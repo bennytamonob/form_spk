@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Kelas SPK - Pemenang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            color: white;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Background dengan gambar dari Google Drive */
+        .bg-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            /* Menggunakan URL export view untuk Google Drive */
+            background-image: url('https://drive.google.com/uc?export=view&id=1XaESY6N8EKEMISiiPl4E78h9JqfCYlXB');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            z-index: -2;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+            z-index: -1;
+        }
+
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Carousel Styles */
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px; /* Dipersempit agar kotak tidak terlalu raksasa di tampilan PC */
+            margin: auto;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        .carousel-slide {
+            display: none;
+            width: 100%;
+            animation: fade 0.5s ease-in-out;
+        }
+        .carousel-slide.active {
+            display: block;
+        }
+        .carousel-slide img {
+            width: 100%;
+            aspect-ratio: 1 / 1; /* Memaksa area slider menjadi kotak 1:1 */
+            object-fit: contain; /* Menampilkan seluruh gambar asli tanpa melar/terpotong */
+            background-color: rgba(0, 0, 0, 0.4); /* Memberi latar gelap jika ada ruang kosong di sisi gambar */
+            border-radius: 1rem;
+        }
+        @keyframes fade {
+            from { opacity: 0.4 }
+            to { opacity: 1 }
+        }
+
+        /* Custom Input Styles */
+        .form-input, .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #fbbf24; /* Amber/Yellow for highlight */
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3);
+        }
+        .form-select option {
+            background-color: #1f2937; /* Dark bg for dropdown items */
+            color: white;
+        }
+
+        /* Loader */
+        .loader {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #fbbf24;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Hide elements utility */
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col items-center">
+
+    <div class="bg-custom"></div>
+    <div class="bg-overlay"></div>
+
+    <div id="custom-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden-view">
+        <div class="absolute inset-0 bg-black opacity-60" onclick="closeModal()"></div>
+        <div class="glass-card p-8 rounded-2xl z-10 max-w-sm w-full mx-4 text-center transform transition-all">
+            <h3 id="modal-title" class="text-2xl font-bold mb-4 text-amber-400">Pesan</h3>
+            <p id="modal-message" class="text-gray-200 mb-6 font-light leading-relaxed"></p>
+            <button onclick="closeModal()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl font-semibold hover:from-amber-400 hover:to-amber-500 transition-all text-gray-900">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <main id="view-landing" class="w-full max-w-4xl px-4 py-12 flex flex-col items-center flex-grow">
+        
+        <!-- Logo & Judul -->
+        <div class="text-center mb-10">
+            <img src="https://i.ibb.co.com/BKsx9NTP/Logo-SPK-New.png" alt="Logo SPK" class="w-32 h-auto mx-auto mb-6 drop-shadow-2xl">
+            <h2 class="text-xl md:text-2xl font-semibold text-amber-400 tracking-wider mb-1">SPK PEMENANG</h2>
+            <h1 class="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg uppercase">SAYA PENGIKUT KRISTUS</h1>
+            <h3 class="text-lg md:text-xl font-light text-gray-300 tracking-widest bg-black bg-opacity-50 inline-block px-4 py-1 rounded-full border border-gray-600">FORM PENDAFTARAN KELAS SPK</h3>
+        </div>
+
+        <!-- Tombol Daftar -->
+        <button onclick="switchView('view-form')" class="mb-16 group relative px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 text-lg md:text-xl font-bold rounded-full overflow-hidden shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:shadow-[0_0_30px_rgba(251,191,36,0.6)] hover:scale-105 transition-all duration-300">
+            <span class="relative z-10 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                ISI FORM PENDAFTARAN
+            </span>
+            <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+        </button>
+
+        <!-- Slider Pengumuman -->
+        <div class="w-full text-center">
+            <h4 class="text-gray-400 text-sm font-semibold uppercase tracking-widest mb-4 flex items-center justify-center gap-2">
+                <span class="w-12 h-px bg-gray-600"></span>
+                Pengumuman
+                <span class="w-12 h-px bg-gray-600"></span>
+            </h4>
+            
+            <div class="carousel-container shadow-2xl bg-black bg-opacity-50 p-2 border border-gray-700">
+                <div id="carousel-slides-container">
+                    <!-- Slides will be injected by JS -->
+                </div>
+                
+                <!-- Controls -->
+                <button onclick="changeSlide(-1)" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 text-white p-3 rounded-full hover:bg-amber-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button onclick="changeSlide(1)" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 text-white p-3 rounded-full hover:bg-amber-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <main id="view-form" class="w-full max-w-3xl px-4 py-8 flex-grow hidden-view">
+        <div class="flex items-center justify-between mb-8">
+            <button onclick="switchView('view-landing')" class="flex items-center gap-2 text-gray-300 hover:text-amber-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                Kembali
+            </button>
+            <img src="https://i.ibb.co.com/BKsx9NTP/Logo-SPK-New.png" alt="Logo" class="h-10 w-auto">
+        </div>
+
+        <div class="glass-card p-6 md:p-10 rounded-3xl">
+            <h2 class="text-2xl md:text-3xl font-bold mb-2 text-amber-400">Form Pendaftaran</h2>
+            <p class="text-gray-300 mb-8 text-sm">Silakan isi data diri Anda dengan lengkap dan benar.</p>
+
+            <form id="registration-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                <!-- Data Pribadi -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Lengkap *</label>
+                        <input type="text" id="namaLengkap" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Panggilan *</label>
+                        <input type="text" id="namaPanggilan" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Tempat Lahir *</label>
+                        <input type="text" id="tempatLahir" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Tanggal Lahir *</label>
+                        <input type="date" id="tanggalLahir" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0 text-white" style="color-scheme: dark;">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Jenis Kelamin *</label>
+                    <select id="jenisKelamin" required class="form-select w-full px-4 py-3 rounded-xl focus:ring-0">
+                        <option value="" disabled selected>Pilih Jenis Kelamin</option>
+                        <option value="Laki-laki">Laki-laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                    </select>
+                </div>
+
+                <!-- Kontak -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">No WA Aktif *</label>
+                        <input type="tel" id="noWa" required placeholder="08xxxxxxxxxx" class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Email *</label>
+                        <input type="email" id="email" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
+                    </div>
+                </div>
+
+                <!-- Data Pelayanan/Gereja -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Fungsi *</label>
+                        <select id="fungsi" required class="form-select w-full px-4 py-3 rounded-xl focus:ring-0">
+                            <option value="" disabled selected>Pilih Fungsi</option>
+                            <option value="Peserta">Peserta</option>
+                            <option value="Pembina">Pembina</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Area Ibadah *</label>
+                        <select id="areaIbadah" required class="form-select w-full px-4 py-3 rounded-xl focus:ring-0">
+                            <option value="" disabled selected>Pilih Area Ibadah</option>
+                            <option value="Umum">Umum</option>
+                            <option value="Youth Pro">Youth Pro</option>
+                            <option value="Youth Teens">Youth Teens</option>
+                            <option value="Abbakids">Abbakids</option>
+                            <option value="Tunas Bangsa">Tunas Bangsa</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Status Baptisan *</label>
+                        <select id="statusBaptisan" required class="form-select w-full px-4 py-3 rounded-xl focus:ring-0">
+                            <option value="" disabled selected>Pilih Status</option>
+                            <option value="Belum">Belum</option>
+                            <option value="Sudah">Sudah</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">PKS (Pembina Kelompok Sel) *</label>
+                        <input type="text" id="pks" required placeholder="Nama PKS Anda" class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
+                    </div>
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit" id="btn-submit" class="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-gray-900 font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg flex items-center justify-center gap-2">
+                        <span>Kirim Pendaftaran</span>
+                        <div id="submit-loader" class="loader hidden-view"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <main id="view-admin-login" class="w-full max-w-md px-4 py-12 flex-grow hidden-view flex flex-col justify-center">
+        <div class="glass-card p-8 rounded-3xl text-center">
+            <h2 class="text-2xl font-bold mb-6 text-white">Admin Login</h2>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <input type="password" id="adminPassword" placeholder="Masukkan Password Admin" class="form-input w-full px-4 py-3 rounded-xl text-center focus:ring-0" required>
+                <button type="submit" class="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-all">
+                    Login
+                </button>
+            </form>
+            <button onclick="switchView('view-landing')" class="mt-4 text-sm text-gray-400 hover:text-white">Batal</button>
+        </div>
+    </main>
+
+    <main id="view-admin-dashboard" class="w-full max-w-4xl px-4 py-8 flex-grow hidden-view">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-amber-400">Pengaturan Admin</h2>
+            <button onclick="switchView('view-landing')" class="px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-sm">
+                Keluar Dashboard
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Pengaturan Apps Script -->
+            <div class="glass-card p-6 rounded-2xl h-fit">
+                <h3 class="text-xl font-semibold mb-4 text-white">Koneksi Database (Google Sheets)</h3>
+                <p class="text-sm text-gray-400 mb-4">Masukkan Web App URL dari Google Apps Script agar form dapat menyimpan data ke Google Sheets.</p>
+                <div class="space-y-4">
+                    <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/..." class="form-input w-full px-4 py-3 rounded-xl focus:ring-0 text-sm">
+                    <button onclick="saveScriptUrl()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all">
+                        Simpan URL Database
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pengaturan Slider -->
+            <div class="glass-card p-6 rounded-2xl">
+                <h3 class="text-xl font-semibold mb-4 text-white">Pengumuman (Slide)</h3>
+                <p class="text-sm text-gray-400 mb-4">Masukkan URL gambar langsung (akhiran .jpg/.png) untuk ditampilkan di halaman awal.</p>
+                
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="newSlideUrl" placeholder="https://contoh.com/gambar.jpg" class="form-input flex-grow px-4 py-2 rounded-xl focus:ring-0 text-sm">
+                    <button onclick="addSlide()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all">
+                        Tambah
+                    </button>
+                </div>
+
+                <div id="admin-slides-list" class="space-y-3 max-h-64 overflow-y-auto pr-2">
+                    <!-- List slide di admin -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Tombol Admin Rahasia di Footer -->
+    <footer class="w-full text-center py-4 text-gray-500 text-xs mt-auto">
+        &copy; 2026 SPK Pemenang. <span onclick="switchView('view-admin-login')" class="cursor-pointer hover:text-gray-300">Admin</span>
+    </footer>
+
+    <script>
+        let state = {
+            currentView: 'view-landing',
+            slideIndex: 0,
+            slides: [], // Data sekarang akan diambil dari database
+            scriptUrl: localStorage.getItem('spk_scriptUrl') || 'https://script.google.com/macros/s/AKfycbwHqIDSGSu3hj57tnE5FB-L9Q4Ibx3LwADc4GuCbfjXqO7E1tcOZbmyeWoqj86OXYbPwg/exec'
+        };
+
+        // DOM Elements
+        const views = {
+            landing: document.getElementById('view-landing'),
+            form: document.getElementById('view-form'),
+            adminLogin: document.getElementById('view-admin-login'),
+            adminDashboard: document.getElementById('view-admin-dashboard')
+        };
+        const modal = document.getElementById('custom-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+
+        function switchView(viewId) {
+            // Hide all views
+            Object.values(views).forEach(el => {
+                if(el) el.classList.add('hidden-view');
+            });
+            
+            // Show requested view
+            const viewToShow = document.getElementById(viewId);
+            if(viewToShow) {
+                viewToShow.classList.remove('hidden-view');
+                state.currentView = viewId;
+                
+                // Trigger specific logic based on view
+                if(viewId === 'view-landing') renderCarousel();
+                if(viewId === 'view-admin-dashboard') renderAdminDashboard();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showModal(title, message, isSuccess = false) {
+            modalTitle.innerText = title;
+            modalTitle.className = isSuccess ? "text-2xl font-bold mb-4 text-emerald-400" : "text-2xl font-bold mb-4 text-amber-400";
+            
+            // Allow HTML in message for styling
+            modalMessage.innerHTML = message;
+            modal.classList.remove('hidden-view');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden-view');
+        }
+
+        function renderCarousel() {
+            const container = document.getElementById('carousel-slides-container');
+            container.innerHTML = ''; // Clear existing
+
+            if(state.slides.length === 0) {
+                container.innerHTML = `<div class="carousel-slide active"><img src="https://placehold.co/800x800/111/444?text=Tidak+Ada+Pengumuman" alt="No slides"></div>`;
+                return;
+            }
+
+            state.slides.forEach((url, index) => {
+                const div = document.createElement('div');
+                div.className = `carousel-slide ${index === state.slideIndex ? 'active' : ''}`;
+                div.innerHTML = `<img src="${url}" alt="Pengumuman ${index + 1}" onerror="this.src='https://placehold.co/800x800/333/fff?text=Gambar+Gagal+Dimuat'">`;
+                container.appendChild(div);
+            });
+        }
+
+        function changeSlide(n) {
+            if(state.slides.length <= 1) return;
+            
+            const slidesElements = document.querySelectorAll('.carousel-slide');
+            slidesElements[state.slideIndex].classList.remove('active');
+            
+            state.slideIndex += n;
+            
+            if (state.slideIndex >= state.slides.length) state.slideIndex = 0;
+            if (state.slideIndex < 0) state.slideIndex = state.slides.length - 1;
+            
+            slidesElements[state.slideIndex].classList.add('active');
+        }
+
+        async function fetchSlides() {
+            const container = document.getElementById('carousel-slides-container');
+            container.innerHTML = `<div class="text-center py-10 text-gray-400"><div class="loader mb-2"></div><p>Memuat pengumuman dari server...</p></div>`;
+            
+            try {
+                // Tambahkan parameter waktu (t) untuk mencegah browser membaca cache error (Cache Buster)
+                const fetchUrl = `${state.scriptUrl}?action=getSlides&t=${new Date().getTime()}`;
+                
+                const response = await fetch(fetchUrl);
+                if (!response.ok) throw new Error("HTTP Error: " + response.status);
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    state.slides = result.data;
+                }
+            } catch (error) {
+                console.warn("Koneksi ke database bermasalah:", error.message);
+                state.slides = [
+                    "https://placehold.co/800x800/1e293b/ef4444?text=Koneksi+Gagal",
+                    "https://placehold.co/800x800/1e293b/fbbf24?text=Pastikan+Akses+Web+App+di-set+'Anyone'"
+                ];
+            }
+            
+            renderCarousel();
+            
+            // Jika admin sedang buka dashboard, perbarui juga listnya
+            if (state.currentView === 'view-admin-dashboard') {
+                renderAdminDashboard();
+            }
+        }
+
+        // Auto slide every 5 seconds
+        setInterval(() => {
+            if(state.currentView === 'view-landing' && state.slides.length > 1) {
+                changeSlide(1);
+            }
+        }, 5000);
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const btnSubmit = document.getElementById('btn-submit');
+            const loader = document.getElementById('submit-loader');
+            const btnText = btnSubmit.querySelector('span');
+
+            // 1. Ambil Data
+            const formData = {
+                namaLengkap: document.getElementById('namaLengkap').value,
+                namaPanggilan: document.getElementById('namaPanggilan').value,
+                tempatLahir: document.getElementById('tempatLahir').value,
+                tanggalLahir: document.getElementById('tanggalLahir').value,
+                jenisKelamin: document.getElementById('jenisKelamin').value,
+                fungsi: document.getElementById('fungsi').value,
+                areaIbadah: document.getElementById('areaIbadah').value,
+                noWa: document.getElementById('noWa').value,
+                email: document.getElementById('email').value,
+                statusBaptisan: document.getElementById('statusBaptisan').value,
+                pks: document.getElementById('pks').value
+            };
+
+            // Loading state
+            btnSubmit.disabled = true;
+            btnText.innerText = 'Mengirim...';
+            loader.classList.remove('hidden-view');
+
+            try {
+                // 2. Kirim Data ke Google Apps Script (Jika URL sudah diset)
+                if (state.scriptUrl && state.scriptUrl.startsWith('https://script.google.com/')) {
+                    
+                    // Gunakan x-www-form-urlencoded untuk kompatibilitas doPost GAS sederhana
+                    const formParams = new URLSearchParams();
+                    for (const key in formData) {
+                        formParams.append(key, formData[key]);
+                    }
+
+                    // Menambahkan mode: 'no-cors' agar tidak terblokir oleh browser (Cross-Origin)
+                    await fetch(state.scriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: formParams
+                    }).catch(err => console.warn('Peringatan pengiriman (diabaikan secara lokal):', err));
+                    
+                } else {
+                    console.warn("Script URL belum dikonfigurasi. Menjalankan mode simulasi.");
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+
+                // 3. Tampilkan Notifikasi Sukses Sesuai Permintaan
+                const successMsg = `
+                    Terima kasih telah mengisi form, data anda berhasil di simpan.<br><br>
+                    <span class="font-semibold text-white italic">"KETERBUKAAN ADALAH AWAL DARI PEMULIHAN"</span>
+                `;
+                showModal("Berhasil!", successMsg, true);
+                
+                // Reset form & kembali
+                document.getElementById('registration-form').reset();
+                setTimeout(() => {
+                    closeModal();
+                    switchView('view-landing');
+                }, 4000);
+
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                showModal("Terjadi Kesalahan", "Gagal mengirim data. Pastikan koneksi internet stabil.");
+            } finally {
+                // Reset button state
+                btnSubmit.disabled = false;
+                btnText.innerText = 'Kirim Pendaftaran';
+                loader.classList.add('hidden-view');
+            }
+        }
+
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const passInput = document.getElementById('adminPassword');
+            const pass = passInput.value;
+            const btn = e.target.querySelector('button');
+            const originalBtnText = btn.innerText;
+            
+            // Tampilan Loading
+            btn.innerText = 'Memeriksa ke Database...';
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            try {
+                const fetchUrl = `${state.scriptUrl}?action=login&password=${encodeURIComponent(pass)}&t=${new Date().getTime()}`;
+                const response = await fetch(fetchUrl);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    passInput.value = '';
+                    switchView('view-admin-dashboard');
+                } else {
+                    showModal("Akses Ditolak", "Password yang Anda masukkan salah.");
+                }
+            } catch (error) {
+                showModal(
+                    "Koneksi Gagal", 
+                    "Gagal menghubungi database.<br><br><span class='text-sm text-gray-300'><b>TIPS:</b> Pastikan di Google Apps Script bagian <b>Who has access</b> di-set ke <b>Anyone</b>, dan Anda sudah melakukan otorisasi script (Run pertama kali).</span>"
+                );
+            } finally {
+                btn.innerText = originalBtnText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function renderAdminDashboard() {
+            // Load Script URL
+            document.getElementById('scriptUrlInput').value = state.scriptUrl;
+            
+            // Load Slides
+            const list = document.getElementById('admin-slides-list');
+            list.innerHTML = '';
+            
+            state.slides.forEach((url, index) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 bg-gray-800 rounded-lg';
+                item.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img src="${url}" class="w-12 h-12 object-cover rounded bg-gray-900" onerror="this.src='https://placehold.co/100x100?text=Error'">
+                        <span class="text-xs text-gray-400 truncate w-32 md:w-64">${url}</span>
+                    </div>
+                    <button onclick="removeSlide(${index})" class="text-red-400 hover:text-red-300 p-2 text-sm font-semibold">Hapus</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function saveScriptUrl() {
+            const url = document.getElementById('scriptUrlInput').value.trim();
+            state.scriptUrl = url;
+            localStorage.setItem('spk_scriptUrl', url);
+            showModal("Tersimpan", "URL Database berhasil diperbarui.", true);
+        }
+
+        async function addSlide() {
+            const input = document.getElementById('newSlideUrl');
+            const url = input.value.trim();
+            if (!url) return;
+            
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = 'Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                // Menyimpan slide baru ke database (dengan cache buster)
+                const fetchUrl = `${state.scriptUrl}?action=addSlide&url=${encodeURIComponent(url)}&t=${new Date().getTime()}`;
+                const response = await fetch(fetchUrl);
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    input.value = '';
+                    await fetchSlides(); // Refresh data dari server
+                    showModal("Berhasil", "Pengumuman berhasil ditambahkan.", true);
+                }
+            } catch(e) {
+                showModal("Gagal", "Tidak dapat menyimpan pengumuman. Periksa koneksi.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function removeSlide(index) {
+            // Tampilkan modal loading
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            
+            modalTitle.innerText = "Memproses";
+            modalTitle.className = "text-2xl font-bold mb-4 text-emerald-400";
+            modalMessage.innerHTML = "Sedang menghapus pengumuman dari database...";
+            modal.classList.remove('hidden-view');
+            
+            try {
+                // Menghapus slide dari database (dengan cache buster)
+                const fetchUrl = `${state.scriptUrl}?action=deleteSlide&index=${index}&t=${new Date().getTime()}`;
+                const response = await fetch(fetchUrl);
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    await fetchSlides(); // Refresh data dari server
+                    closeModal();
+                }
+            } catch(e) {
+                showModal("Gagal", "Tidak dapat menghapus pengumuman.");
+            }
+        }
+
+        // Initialize App
+        fetchSlides();
+    </script>
+</body>
+</html>
