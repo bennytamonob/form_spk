@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Kelas SPK - Pemenang</title>
+    <title>Dashboard Admin - SPK Pemenang</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -14,638 +16,1116 @@
             margin: 0;
             overflow-x: hidden;
         }
-
-        /* Background dengan gambar dari Google Drive */
         .bg-custom {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            /* Menggunakan URL export view untuk Google Drive */
+            top: 0; left: 0; width: 100vw; height: 100vh;
             background-image: url('https://drive.google.com/uc?export=view&id=1XaESY6N8EKEMISiiPl4E78h9JqfCYlXB');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            z-index: -2;
+            background-size: cover; background-position: center; background-attachment: fixed; z-index: -2;
         }
-
         .bg-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(15, 23, 42, 0.95));
             z-index: -1;
         }
-
-        /* Glassmorphism Effect */
         .glass-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
-
-        /* Carousel Styles */
-        .carousel-container {
-            position: relative;
-            width: 100%;
-            max-width: 500px; /* Dipersempit agar kotak tidak terlalu raksasa di tampilan PC */
-            margin: auto;
-            overflow: hidden;
-            border-radius: 1rem;
-        }
-        .carousel-slide {
-            display: none;
-            width: 100%;
-            animation: fade 0.5s ease-in-out;
-        }
-        .carousel-slide.active {
-            display: block;
-        }
-        .carousel-slide img {
-            width: 100%;
-            aspect-ratio: 1 / 1; /* Memaksa area slider menjadi kotak 1:1 */
-            object-fit: contain; /* Menampilkan seluruh gambar asli tanpa melar/terpotong */
-            background-color: rgba(0, 0, 0, 0.4); /* Memberi latar gelap jika ada ruang kosong di sisi gambar */
-            border-radius: 1rem;
-        }
-        @keyframes fade {
-            from { opacity: 0.4 }
-            to { opacity: 1 }
-        }
-
-        /* Custom Input Styles */
         .form-input, .form-select {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); color: white;
         }
         .form-input:focus, .form-select:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #fbbf24; /* Amber/Yellow for highlight */
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3);
+            border-color: #fbbf24; outline: none; box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3);
         }
-        .form-select option {
-            background-color: #1f2937; /* Dark bg for dropdown items */
-            color: white;
-        }
-
-        /* Loader */
+        .form-select option { background-color: #1f2937; color: white; }
+        
         .loader {
-            border: 4px solid rgba(255,255,255,0.1);
-            border-top: 4px solid #fbbf24;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
+            border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #fbbf24;
+            border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Hide elements utility */
         .hidden-view { display: none !important; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(251, 191, 36, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(251, 191, 36, 0.8); }
+
+        /* Table Styles */
+        table { border-collapse: collapse; width: 100%; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { background: rgba(0,0,0,0.4); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; color: #fbbf24; }
+        tr:hover { background: rgba(255,255,255,0.05); }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col items-center">
+<body class="antialiased min-h-screen flex text-sm md:text-base">
 
     <div class="bg-custom"></div>
     <div class="bg-overlay"></div>
 
+    <!-- Modal Notifikasi -->
     <div id="custom-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden-view">
-        <div class="absolute inset-0 bg-black opacity-60" onclick="closeModal()"></div>
-        <div class="glass-card p-8 rounded-2xl z-10 max-w-sm w-full mx-4 text-center transform transition-all">
+        <div class="absolute inset-0 bg-black opacity-70" onclick="closeModal()"></div>
+        <div class="glass-card p-6 md:p-8 rounded-2xl z-10 max-w-sm w-full mx-4 text-center transform transition-all shadow-2xl border border-gray-600">
             <h3 id="modal-title" class="text-2xl font-bold mb-4 text-amber-400">Pesan</h3>
             <p id="modal-message" class="text-gray-200 mb-6 font-light leading-relaxed"></p>
-            <button onclick="closeModal()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl font-semibold hover:from-amber-400 hover:to-amber-500 transition-all text-gray-900">
-                Tutup
-            </button>
+            <div id="modal-actions" class="flex gap-4 justify-center">
+                <button onclick="closeModal()" class="flex-1 py-2 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl font-semibold hover:from-amber-400 hover:to-amber-500 transition-all text-gray-900">Tutup</button>
+            </div>
         </div>
     </div>
 
-    <main id="view-landing" class="w-full max-w-4xl px-4 py-12 flex flex-col items-center flex-grow">
-        
-        <!-- Logo & Judul -->
-        <div class="text-center mb-10">
-            <img src="https://i.ibb.co.com/BKsx9NTP/Logo-SPK-New.png" alt="Logo SPK" class="w-32 h-auto mx-auto mb-6 drop-shadow-2xl">
-            <h2 class="text-xl md:text-2xl font-semibold text-amber-400 tracking-wider mb-1">SPK PEMENANG</h2>
-            <h1 class="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg uppercase">SAYA PENGIKUT KRISTUS</h1>
-            <h3 class="text-lg md:text-xl font-light text-gray-300 tracking-widest bg-black bg-opacity-50 inline-block px-4 py-1 rounded-full border border-gray-600">FORM PENDAFTARAN KELAS SPK</h3>
-        </div>
-
-        <!-- Tombol Daftar -->
-        <button onclick="switchView('view-form')" class="mb-16 group relative px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 text-lg md:text-xl font-bold rounded-full overflow-hidden shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:shadow-[0_0_30px_rgba(251,191,36,0.6)] hover:scale-105 transition-all duration-300">
-            <span class="relative z-10 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                ISI FORM PENDAFTARAN
-            </span>
-            <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-        </button>
-
-        <!-- Slider Pengumuman -->
-        <div class="w-full text-center">
-            <h4 class="text-gray-400 text-sm font-semibold uppercase tracking-widest mb-4 flex items-center justify-center gap-2">
-                <span class="w-12 h-px bg-gray-600"></span>
-                Pengumuman
-                <span class="w-12 h-px bg-gray-600"></span>
-            </h4>
-            
-            <div class="carousel-container shadow-2xl bg-black bg-opacity-50 p-2 border border-gray-700">
-                <div id="carousel-slides-container">
-                    <!-- Slides will be injected by JS -->
-                </div>
-                
-                <!-- Controls -->
-                <button onclick="changeSlide(-1)" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 text-white p-3 rounded-full hover:bg-amber-500 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <button onclick="changeSlide(1)" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-60 text-white p-3 rounded-full hover:bg-amber-500 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <main id="view-form" class="w-full max-w-3xl px-4 py-8 flex-grow hidden-view">
-        <div class="flex items-center justify-between mb-8">
-            <button onclick="switchView('view-landing')" class="flex items-center gap-2 text-gray-300 hover:text-amber-400 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                Kembali
-            </button>
-            <img src="https://i.ibb.co.com/BKsx9NTP/Logo-SPK-New.png" alt="Logo" class="h-10 w-auto">
-        </div>
-
-        <div class="glass-card p-6 md:p-10 rounded-3xl">
-            <h2 class="text-2xl md:text-3xl font-bold mb-2 text-amber-400">Form Pendaftaran</h2>
-            <p class="text-gray-300 mb-8 text-sm">Silakan isi data diri Anda dengan lengkap dan benar.</p>
-
-            <form id="registration-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
-                <!-- Data Pribadi -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Modal Form Edit Peserta -->
+    <div id="edit-modal" class="fixed inset-0 z-40 flex items-center justify-center hidden-view">
+        <div class="absolute inset-0 bg-black opacity-80" onclick="closeEditModal()"></div>
+        <div class="glass-card p-6 md:p-8 rounded-2xl z-10 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl font-bold mb-6 text-amber-400 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                Edit Data Pendaftar
+            </h3>
+            <form id="edit-form" onsubmit="submitEditForm(event)" class="space-y-4">
+                <input type="hidden" id="edit-row">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Lengkap *</label>
-                        <input type="text" id="namaLengkap" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
+                        <label class="block text-xs text-gray-400 mb-1">Nama Lengkap</label>
+                        <input type="text" id="edit-nama" class="form-input w-full px-3 py-2 rounded-lg" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Nama Panggilan *</label>
-                        <input type="text" id="namaPanggilan" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
+                        <label class="block text-xs text-gray-400 mb-1">Nama Panggilan</label>
+                        <input type="text" id="edit-panggilan" class="form-input w-full px-3 py-2 rounded-lg" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Tempat Lahir *</label>
-                        <input type="text" id="tempatLahir" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Tanggal Lahir *</label>
-                        <input type="date" id="tanggalLahir" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0 text-white" style="color-scheme: dark;">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Jenis Kelamin *</label>
-                    <select id="jenisKelamin" required class="form-select w-full px-4 py-3 rounded-xl focus:ring-0">
-                        <option value="" disabled selected>Pilih Jenis Kelamin</option>
-                        <option value="Laki-laki">Laki-laki</option>
-                        <option value="Perempuan">Perempuan</option>
-                    </select>
-                </div>
-
-                <!-- Kontak -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">No WA Aktif *</label>
-                        <input type="tel" id="noWa" required placeholder="08xxxxxxxxxx" class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Email *</label>
-                        <input type="email" id="email" required class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
-                    </div>
-                </div>
-
-                <!-- Data Pelayanan/Gereja -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Fungsi *</label>
-                        <select id="fungsi" required class="form-select w-full px-4 py-3 rounded-xl focus:ring-0">
-                            <option value="" disabled selected>Pilih Fungsi</option>
-                            <option value="Peserta">Peserta</option>
-                            <option value="Pembina">Pembina</option>
+                        <label class="block text-xs text-gray-400 mb-1">Fungsi</label>
+                        <select id="edit-fungsi" class="form-select w-full px-3 py-2 rounded-lg" required>
+                            <option value="Peserta">Peserta</option><option value="Pembina">Pembina</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Area Ibadah *</label>
-                        <select id="areaIbadah" required class="form-select w-full px-4 py-3 rounded-xl focus:ring-0">
-                            <option value="" disabled selected>Pilih Area Ibadah</option>
-                            <option value="Umum">Umum</option>
-                            <option value="Youth Pro">Youth Pro</option>
-                            <option value="Youth Teens">Youth Teens</option>
-                            <option value="Abbakids">Abbakids</option>
+                        <label class="block text-xs text-gray-400 mb-1">Status Baptisan</label>
+                        <select id="edit-baptis" class="form-select w-full px-3 py-2 rounded-lg" required>
+                            <option value="Belum">Belum</option><option value="Sudah">Sudah</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Area Ibadah</label>
+                        <select id="edit-area" class="form-select w-full px-3 py-2 rounded-lg" required>
+                            <option value="Umum">Umum</option><option value="Youth Pro">Youth Pro</option>
+                            <option value="Youth Teens">Youth Teens</option><option value="Abbakids">Abbakids</option>
                             <option value="Tunas Bangsa">Tunas Bangsa</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Status Baptisan *</label>
-                        <select id="statusBaptisan" required class="form-select w-full px-4 py-3 rounded-xl focus:ring-0">
-                            <option value="" disabled selected>Pilih Status</option>
-                            <option value="Belum">Belum</option>
-                            <option value="Sudah">Sudah</option>
-                        </select>
+                        <label class="block text-xs text-gray-400 mb-1">Nama PKS</label>
+                        <input type="text" id="edit-pks" class="form-input w-full px-3 py-2 rounded-lg" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">PKS (Pembina Kelompok Sel) *</label>
-                        <input type="text" id="pks" required placeholder="Nama PKS Anda" class="form-input w-full px-4 py-3 rounded-xl focus:ring-0">
+                        <label class="block text-xs text-gray-400 mb-1">No WA</label>
+                        <input type="text" id="edit-wa" class="form-input w-full px-3 py-2 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Tanggal Lahir</label>
+                        <input type="date" id="edit-tgl" class="form-input w-full px-3 py-2 rounded-lg" required>
                     </div>
                 </div>
-
-                <div class="pt-6">
-                    <button type="submit" id="btn-submit" class="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-gray-900 font-bold text-lg rounded-xl hover:from-amber-400 hover:to-amber-500 transition-all shadow-lg flex items-center justify-center gap-2">
-                        <span>Kirim Pendaftaran</span>
-                        <div id="submit-loader" class="loader hidden-view"></div>
+                <div class="flex gap-4 mt-6 pt-4 border-t border-gray-700">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white w-1/3">Batal</button>
+                    <button type="submit" id="btn-save-edit" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 rounded-lg transition-colors text-gray-900 font-bold w-2/3 flex items-center justify-center gap-2">
+                        Simpan Perubahan
                     </button>
                 </div>
             </form>
         </div>
-    </main>
+    </div>
 
-    <main id="view-admin-login" class="w-full max-w-md px-4 py-12 flex-grow hidden-view flex flex-col justify-center">
-        <div class="glass-card p-8 rounded-3xl text-center">
-            <h2 class="text-2xl font-bold mb-6 text-white">Admin Login</h2>
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <input type="password" id="adminPassword" placeholder="Masukkan Password Admin" class="form-input w-full px-4 py-3 rounded-xl text-center focus:ring-0" required>
-                <button type="submit" class="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-all">
-                    Login
+    <main id="view-login" class="w-full min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="glass-card p-8 md:p-10 rounded-3xl w-full max-w-md text-center border-t-4 border-amber-500 shadow-[0_0_40px_rgba(251,191,36,0.15)]">
+            <img id="login-logo" src="https://i.ibb.co.com/BKsx9NTP/Logo-SPK-New.png" alt="Logo SPK" class="w-24 h-auto mx-auto mb-6 drop-shadow-lg">
+            <h2 class="text-2xl font-bold mb-1 text-white">Dashboard Admin</h2>
+            <p class="text-sm text-gray-400 mb-8">Silakan login untuk mengelola data SPK</p>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Username</label>
+                    <input type="text" id="login-username" class="form-input w-full px-4 py-3 rounded-xl focus:ring-0" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Password</label>
+                    <input type="password" id="login-password" class="form-input w-full px-4 py-3 rounded-xl focus:ring-0" required>
+                </div>
+                <button type="submit" id="btn-login" class="w-full py-4 mt-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-gray-900 font-bold rounded-xl hover:shadow-[0_0_20px_rgba(251,191,36,0.4)] transition-all flex items-center justify-center gap-2">
+                    Masuk Sistem
                 </button>
             </form>
-            <button onclick="switchView('view-landing')" class="mt-4 text-sm text-gray-400 hover:text-white">Batal</button>
         </div>
     </main>
 
-    <main id="view-admin-dashboard" class="w-full max-w-4xl px-4 py-8 flex-grow hidden-view">
-        <div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-amber-400">Pengaturan Admin</h2>
-            <button onclick="switchView('view-landing')" class="px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-sm">
-                Keluar Dashboard
+    <div id="app-layout" class="w-full flex min-h-screen hidden-view">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 glass-card border-r border-gray-700 flex flex-col hidden md:flex h-screen sticky top-0">
+            <div class="p-6 text-center border-b border-gray-700">
+                <img id="sidebar-logo" src="https://i.ibb.co.com/BKsx9NTP/Logo-SPK-New.png" class="w-16 mx-auto mb-2 drop-shadow-md">
+                <h1 class="font-bold text-amber-400 tracking-wider text-sm">SPK PEMENANG</h1>
+                <p class="text-xs text-gray-400">Admin Panel</p>
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <button onclick="nav('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-white hover:bg-opacity-10 transition-colors text-amber-400 bg-white bg-opacity-5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    Dashboard
+                </button>
+                <button onclick="nav('data')" id="nav-data" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-white hover:bg-opacity-10 transition-colors text-gray-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    Data Peserta
+                </button>
+                <button onclick="nav('jadwal')" id="nav-jadwal" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-white hover:bg-opacity-10 transition-colors text-gray-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Jadwal Kelas
+                </button>
+                <button onclick="nav('absen')" id="nav-absen" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-white hover:bg-opacity-10 transition-colors text-gray-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    Absensi Kelas
+                </button>
+                <button onclick="nav('setting')" id="nav-setting" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-white hover:bg-opacity-10 transition-colors text-gray-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Settings
+                </button>
+            </nav>
+            <div class="p-4 border-t border-gray-700">
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500 bg-opacity-20 text-red-400 rounded-lg hover:bg-opacity-40 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Mobile Header -->
+        <div class="md:hidden fixed top-0 w-full glass-card border-b border-gray-700 p-4 flex justify-between items-center z-30">
+            <div class="flex items-center gap-3">
+                <img src="https://i.ibb.co.com/BKsx9NTP/Logo-SPK-New.png" class="w-8 h-8">
+                <h1 class="font-bold text-amber-400">Admin SPK</h1>
+            </div>
+            <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Pengaturan Apps Script -->
-            <div class="glass-card p-6 rounded-2xl h-fit">
-                <h3 class="text-xl font-semibold mb-4 text-white">Koneksi Database (Google Sheets)</h3>
-                <p class="text-sm text-gray-400 mb-4">Masukkan Web App URL dari Google Apps Script agar form dapat menyimpan data ke Google Sheets.</p>
-                <div class="space-y-4">
-                    <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/..." class="form-input w-full px-4 py-3 rounded-xl focus:ring-0 text-sm">
-                    <button onclick="saveScriptUrl()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all">
-                        Simpan URL Database
-                    </button>
-                </div>
-            </div>
-
-            <!-- Pengaturan Slider -->
-            <div class="glass-card p-6 rounded-2xl">
-                <h3 class="text-xl font-semibold mb-4 text-white">Pengumuman (Slide)</h3>
-                <p class="text-sm text-gray-400 mb-4">Masukkan URL gambar langsung (akhiran .jpg/.png) untuk ditampilkan di halaman awal.</p>
-                
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="newSlideUrl" placeholder="https://contoh.com/gambar.jpg" class="form-input flex-grow px-4 py-2 rounded-xl focus:ring-0 text-sm">
-                    <button onclick="addSlide()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all">
-                        Tambah
-                    </button>
-                </div>
-
-                <div id="admin-slides-list" class="space-y-3 max-h-64 overflow-y-auto pr-2">
-                    <!-- List slide di admin -->
-                </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden fixed inset-0 bg-gray-900 bg-opacity-95 z-20 pt-20 px-6">
+            <div class="space-y-4">
+                <button onclick="nav('dashboard'); document.getElementById('mobile-menu').classList.add('hidden')" class="w-full py-3 text-left border-b border-gray-700 text-amber-400 font-semibold">Dashboard</button>
+                <button onclick="nav('data'); document.getElementById('mobile-menu').classList.add('hidden')" class="w-full py-3 text-left border-b border-gray-700 text-white font-semibold">Data Peserta</button>
+                <button onclick="nav('jadwal'); document.getElementById('mobile-menu').classList.add('hidden')" class="w-full py-3 text-left border-b border-gray-700 text-white font-semibold">Jadwal Kelas</button>
+                <button onclick="nav('absen'); document.getElementById('mobile-menu').classList.add('hidden')" class="w-full py-3 text-left border-b border-gray-700 text-white font-semibold">Absensi Kelas</button>
+                <button onclick="nav('setting'); document.getElementById('mobile-menu').classList.add('hidden')" class="w-full py-3 text-left border-b border-gray-700 text-white font-semibold">Settings</button>
+                <button onclick="logout()" class="w-full py-3 text-left text-red-400 font-semibold">Logout</button>
             </div>
         </div>
-    </main>
 
-    <!-- Tombol Admin Rahasia di Footer -->
-    <footer class="w-full text-center py-4 text-gray-500 text-xs mt-auto">
-        &copy; 2026 SPK Pemenang. <span onclick="switchView('view-admin-login')" class="cursor-pointer hover:text-gray-300">Admin</span>
-    </footer>
+        <!-- Main Content Area -->
+        <main class="flex-1 h-screen overflow-y-auto p-4 md:p-8 pt-20 md:pt-8 w-full">
+            
+            <section id="section-dashboard" class="animate-fade-in space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-white">Ringkasan Data</h2>
+                    <button onclick="fetchDashboardStats()" class="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 text-gray-300" title="Refresh">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-blue-500 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <p class="text-gray-400 text-sm font-medium">Total Peserta</p>
+                            <svg class="w-6 h-6 text-blue-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        </div>
+                        <h3 id="stat-peserta" class="text-4xl font-bold text-white mt-2">0</h3>
+                        <div class="flex gap-4 mt-4 pt-3 border-t border-gray-700 text-xs text-gray-400 font-medium">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-400"></span> L: <span id="stat-peserta-l" class="text-white">0</span></span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-400"></span> P: <span id="stat-peserta-p" class="text-white">0</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-amber-500 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <p class="text-gray-400 text-sm font-medium">Total Pembina</p>
+                            <svg class="w-6 h-6 text-amber-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <h3 id="stat-pembina" class="text-4xl font-bold text-white mt-2">0</h3>
+                        <div class="flex gap-4 mt-4 pt-3 border-t border-gray-700 text-xs text-gray-400 font-medium">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span> L: <span id="stat-pembina-l" class="text-white">0</span></span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-400"></span> P: <span id="stat-pembina-p" class="text-white">0</span></span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-emerald-500 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <p class="text-gray-400 text-sm font-medium">Sudah Baptis</p>
+                            <svg class="w-6 h-6 text-emerald-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 id="stat-baptis-sudah" class="text-4xl font-bold text-white mt-2">0</h3>
+                        <div class="flex gap-4 mt-4 pt-3 border-t border-gray-700 text-xs text-gray-400 font-medium">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> L: <span id="stat-baptis-sudah-l" class="text-white">0</span></span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-400"></span> P: <span id="stat-baptis-sudah-p" class="text-white">0</span></span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-red-500 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <p class="text-gray-400 text-sm font-medium">Belum Baptis</p>
+                            <svg class="w-6 h-6 text-red-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 id="stat-baptis-belum" class="text-4xl font-bold text-white mt-2">0</h3>
+                        <div class="flex gap-4 mt-4 pt-3 border-t border-gray-700 text-xs text-gray-400 font-medium">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-400"></span> L: <span id="stat-baptis-belum-l" class="text-white">0</span></span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-400"></span> P: <span id="stat-baptis-belum-p" class="text-white">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Histori 7 Hari -->
+                <div class="glass-card p-6 rounded-2xl w-full">
+                    <h3 class="text-lg font-semibold text-white mb-4">Histori Pendaftaran (7 Hari Terakhir)</h3>
+                    <div class="w-full h-[300px] relative">
+                        <canvas id="historyChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-data" class="animate-fade-in space-y-6 hidden-view">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <h2 class="text-2xl font-bold text-white">Data Pendaftar</h2>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <input type="text" id="search-data" placeholder="Cari nama..." onkeyup="filterTable()" class="form-input px-4 py-2 rounded-lg text-sm w-full md:w-64">
+                        <button onclick="fetchParticipants()" class="px-4 py-2 bg-amber-500 text-gray-900 rounded-lg hover:bg-amber-400 font-semibold flex items-center gap-2 text-sm whitespace-nowrap">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Muat Data
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto w-full">
+                        <table id="participants-table" class="min-w-max w-full text-sm">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tgl Daftar</th>
+                                    <th>Nama Lengkap</th>
+                                    <th>Panggilan</th>
+                                    <th>Fungsi</th>
+                                    <th>Status Baptis</th>
+                                    <th>Area Ibadah</th>
+                                    <th>PKS</th>
+                                    <th>No WA</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <tr><td colspan="10" class="text-center text-gray-400 py-8">Klik 'Muat Data' untuk menampilkan informasi</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-jadwal" class="animate-fade-in space-y-6 hidden-view">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-white">Jadwal Kelas SPK</h2>
+                    <button onclick="nav('setting')" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 font-semibold text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        Edit Jadwal
+                    </button>
+                </div>
+                
+                <div class="glass-card p-6 rounded-2xl">
+                    <div id="jadwal-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="text-center col-span-full py-8 text-gray-400">Memuat Jadwal...</div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-absen" class="animate-fade-in space-y-6 hidden-view">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <h2 class="text-2xl font-bold text-white">Absensi Kelas</h2>
+                    <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                        <select id="absen-jadwal-select" onchange="fetchAbsensi()" class="form-select px-4 py-2 rounded-lg text-sm w-full md:w-64 border-emerald-500 border focus:border-emerald-400">
+                            <option value="">Pilih Jadwal Kelas...</option>
+                        </select>
+                        <button onclick="saveAbsensi()" id="btn-save-absen" class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 font-semibold flex items-center justify-center gap-2 text-sm whitespace-nowrap shadow-lg shadow-emerald-900/50">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Simpan Absen
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <div class="p-4 border-b border-gray-700 flex flex-col md:flex-row gap-4 justify-between items-center bg-black bg-opacity-20">
+                        <div class="flex gap-4 items-center w-full md:w-auto">
+                            <input type="text" id="search-absen" placeholder="Cari nama..." onkeyup="renderAbsensiTable()" class="form-input px-4 py-2 rounded-lg text-sm w-full md:w-48">
+                            <select id="filter-absen-fungsi" onchange="renderAbsensiTable()" class="form-select px-4 py-2 rounded-lg text-sm">
+                                <option value="Semua">Semua Fungsi</option>
+                                <option value="Peserta">Peserta</option>
+                                <option value="Pembina">Pembina</option>
+                            </select>
+                        </div>
+                        <div class="text-sm text-gray-400 font-medium">
+                            Total Hadir: <span id="absen-total-hadir" class="text-emerald-400 font-bold text-xl ml-2">0</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto w-full max-h-[65vh]">
+                        <table id="absen-table" class="min-w-max w-full text-sm">
+                            <thead class="sticky top-0 z-10 bg-gray-900 shadow-md">
+                                <tr>
+                                    <th class="w-16 text-center">No</th>
+                                    <th class="w-24 text-center text-emerald-400">Hadir</th>
+                                    <th>Nama Lengkap</th>
+                                    <th>Panggilan</th>
+                                    <th>Fungsi</th>
+                                    <th>Area Ibadah</th>
+                                </tr>
+                            </thead>
+                            <tbody id="absen-table-body">
+                                <tr><td colspan="6" class="text-center text-gray-400 py-12 flex flex-col items-center justify-center gap-3"><svg class="w-12 h-12 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span>Pilih jadwal kelas terlebih dahulu di menu atas</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-setting" class="animate-fade-in space-y-8 hidden-view pb-12">
+                <h2 class="text-2xl font-bold text-white">Pengaturan Aplikasi</h2>
+                
+                <!-- Database URL Setting -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                        Pengaturan Database (URL)
+                    </h3>
+                    <div class="flex flex-col gap-2">
+                        <label class="block text-xs text-gray-400">URL Database Google Apps Script</label>
+                        <input type="text" id="setting-db-url" class="form-input w-full px-4 py-2 rounded-lg font-mono text-sm" onchange="updateDbUrl(this.value)">
+                    </div>
+                </div>
+
+                <!-- Logo Setting -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Pengaturan Logo
+                    </h3>
+                    <div class="flex flex-col md:flex-row gap-4 items-end">
+                        <div class="flex-1 w-full">
+                            <label class="block text-xs text-gray-400 mb-1">URL Logo Baru</label>
+                            <input type="text" id="setting-logo-url" class="form-input w-full px-4 py-2 rounded-lg">
+                        </div>
+                        <button onclick="updateLogo()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white font-semibold transition-colors w-full md:w-auto">Simpan Logo</button>
+                    </div>
+                </div>
+
+                <!-- Account Management -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        Manajemen Akun Admin
+                    </h3>
+                    
+                    <form onsubmit="addAccount(event)" class="bg-black bg-opacity-30 p-4 rounded-xl border border-gray-700 mb-6 flex flex-col md:flex-row gap-4 items-end">
+                        <div class="flex-1 w-full">
+                            <label class="block text-xs text-gray-400 mb-1">Username Baru</label>
+                            <input type="text" id="new-acc-user" class="form-input w-full px-3 py-2 rounded-lg" required>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <label class="block text-xs text-gray-400 mb-1">Password Baru</label>
+                            <input type="text" id="new-acc-pass" class="form-input w-full px-3 py-2 rounded-lg" required>
+                        </div>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-semibold transition-colors w-full md:w-auto flex-shrink-0">Tambah Akun</button>
+                    </form>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead><tr><th>Username</th><th>Password</th><th class="text-right">Aksi</th></tr></thead>
+                            <tbody id="accounts-table-body">
+                                <tr><td colspan="3" class="text-center py-4">Memuat data akun...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Schedule Management -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Edit Jadwal Kelas SPK
+                    </h3>
+                    <div id="schedule-edit-container" class="space-y-3 mb-4">
+                        <!-- Dynamic inputs injected here -->
+                    </div>
+                    <div class="flex gap-3 border-t border-gray-700 pt-4">
+                        <button onclick="addScheduleRow()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white font-semibold transition-colors text-sm">+ Tambah Baris Jadwal</button>
+                        <button onclick="saveSchedule()" class="px-6 py-2 bg-amber-500 hover:bg-amber-400 rounded-lg text-gray-900 font-bold transition-colors text-sm ml-auto">Simpan Semua Jadwal</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
 
     <script>
-        let state = {
-            currentView: 'view-landing',
-            slideIndex: 0,
-            slides: [], // Data sekarang akan diambil dari database
-            scriptUrl: localStorage.getItem('spk_scriptUrl') || 'https://script.google.com/macros/s/AKfycbwHqIDSGSu3hj57tnE5FB-L9Q4Ibx3LwADc4GuCbfjXqO7E1tcOZbmyeWoqj86OXYbPwg/exec'
+        // State Management
+        let APP_STATE = {
+            dbUrl: localStorage.getItem('spk_db_url') || 'https://script.google.com/macros/s/AKfycbwHqIDSGSu3hj57tnE5FB-L9Q4Ibx3LwADc4GuCbfjXqO7E1tcOZbmyeWoqj86OXYbPwg/exec',
+            isLoggedIn: false,
+            currentUser: null,
+            rawParticipantsData: [], // Store raw data for editing
+            rawScheduleData: [],
+            currentAbsenData: new Set(), // Menyimpan ID/baris peserta yang hadir
+            chartInstance: null
         };
 
         // DOM Elements
-        const views = {
-            landing: document.getElementById('view-landing'),
-            form: document.getElementById('view-form'),
-            adminLogin: document.getElementById('view-admin-login'),
-            adminDashboard: document.getElementById('view-admin-dashboard')
-        };
         const modal = document.getElementById('custom-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-
-        function switchView(viewId) {
-            // Hide all views
-            Object.values(views).forEach(el => {
-                if(el) el.classList.add('hidden-view');
-            });
-            
-            // Show requested view
-            const viewToShow = document.getElementById(viewId);
-            if(viewToShow) {
-                viewToShow.classList.remove('hidden-view');
-                state.currentView = viewId;
-                
-                // Trigger specific logic based on view
-                if(viewId === 'view-landing') renderCarousel();
-                if(viewId === 'view-admin-dashboard') renderAdminDashboard();
-            }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        const editModal = document.getElementById('edit-modal');
+        
+        function updateDbUrl(val) {
+            APP_STATE.dbUrl = val;
+            localStorage.setItem('spk_db_url', val);
         }
 
-        function showModal(title, message, isSuccess = false) {
-            modalTitle.innerText = title;
-            modalTitle.className = isSuccess ? "text-2xl font-bold mb-4 text-emerald-400" : "text-2xl font-bold mb-4 text-amber-400";
+        function showModal(title, message, isError = false, actionsHtml = null) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-title').className = isError ? "text-2xl font-bold mb-4 text-red-400" : "text-2xl font-bold mb-4 text-emerald-400";
+            document.getElementById('modal-message').innerHTML = message;
             
-            // Allow HTML in message for styling
-            modalMessage.innerHTML = message;
+            if(actionsHtml) {
+                document.getElementById('modal-actions').innerHTML = actionsHtml;
+            } else {
+                document.getElementById('modal-actions').innerHTML = `<button onclick="closeModal()" class="flex-1 py-2 bg-gray-700 rounded-xl font-semibold hover:bg-gray-600 transition-all text-white">Tutup</button>`;
+            }
             modal.classList.remove('hidden-view');
         }
 
-        function closeModal() {
-            modal.classList.add('hidden-view');
+        function closeModal() { modal.classList.add('hidden-view'); }
+        function closeEditModal() { editModal.classList.add('hidden-view'); }
+
+        function showLoadingBox(msg = "Memproses data...") {
+            showModal("Mohon Tunggu", `<div class="flex flex-col items-center gap-3"><div class="loader"></div><p>${msg}</p></div>`, false, "");
         }
 
-        function renderCarousel() {
-            const container = document.getElementById('carousel-slides-container');
-            container.innerHTML = ''; // Clear existing
+        // Navigation
+        function nav(tab) {
+            if(!APP_STATE.isLoggedIn) return;
+            
+            // Reset styles
+            ['dashboard', 'data', 'jadwal', 'absen', 'setting'].forEach(t => {
+                const sec = document.getElementById(`section-${t}`);
+                if(sec) sec.classList.add('hidden-view');
+                const btn = document.getElementById(`nav-${t}`);
+                if(btn) {
+                    btn.classList.remove('text-amber-400', 'bg-white', 'bg-opacity-5');
+                    btn.classList.add('text-gray-300');
+                }
+            });
 
-            if(state.slides.length === 0) {
-                container.innerHTML = `<div class="carousel-slide active"><img src="https://placehold.co/800x800/111/444?text=Tidak+Ada+Pengumuman" alt="No slides"></div>`;
+            // Set active
+            const activeSec = document.getElementById(`section-${tab}`);
+            if(activeSec) activeSec.classList.remove('hidden-view');
+            const activeBtn = document.getElementById(`nav-${tab}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-gray-300');
+                activeBtn.classList.add('text-amber-400', 'bg-white', 'bg-opacity-5');
+            }
+
+            // Load data based on tab
+            if(tab === 'dashboard') fetchDashboardStats();
+            if(tab === 'data') { if(APP_STATE.rawParticipantsData.length === 0) fetchParticipants(); }
+            if(tab === 'jadwal') fetchSchedule();
+            if(tab === 'absen') prepareAbsenTab();
+            if(tab === 'setting') fetchSettings();
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value;
+            const p = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-login');
+            
+            btn.innerHTML = `<div class="loader w-5 h-5 border-gray-900 border-t-white"></div> Memeriksa...`;
+            btn.disabled = true;
+
+            try {
+                // Gunakan POST untuk keamanan agar parameter tidak terlihat di URL
+                const params = new URLSearchParams();
+                params.append('action', 'adminLogin');
+                params.append('username', u);
+                params.append('password', p);
+
+                const res = await fetch(APP_STATE.dbUrl, { method: 'POST', body: params });
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    APP_STATE.isLoggedIn = true;
+                    APP_STATE.currentUser = u;
+                    
+                    document.getElementById('view-login').classList.add('hidden-view');
+                    document.getElementById('app-layout').classList.remove('hidden-view');
+                    nav('dashboard');
+                } else {
+                    showModal("Login Gagal", result.message || "Username atau password salah.", true);
+                }
+            } catch (err) {
+                console.error(err);
+                showModal("Koneksi Error", "Pastikan URL Database Google Apps Script sudah benar, di-Deploy sebagai Web App, dan di-set akses ke 'Anyone'.", true);
+            } finally {
+                btn.innerHTML = `Masuk Sistem`;
+                btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            APP_STATE.isLoggedIn = false;
+            APP_STATE.currentUser = null;
+            document.getElementById('app-layout').classList.add('hidden-view');
+            document.getElementById('view-login').classList.remove('hidden-view');
+            
+            // Clear inputs
+            document.getElementById('login-password').value = '';
+        }
+
+        async function fetchDashboardStats() {
+            try {
+                const res = await fetch(`${APP_STATE.dbUrl}?action=getDashboardStats&t=${Date.now()}`);
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    const stats = data.data;
+                    
+                    // Animasi Counter Total & Update L/P
+                    animateValue("stat-peserta", stats.peserta.total);
+                    document.getElementById("stat-peserta-l").innerText = stats.peserta.L;
+                    document.getElementById("stat-peserta-p").innerText = stats.peserta.P;
+
+                    animateValue("stat-pembina", stats.pembina.total);
+                    document.getElementById("stat-pembina-l").innerText = stats.pembina.L;
+                    document.getElementById("stat-pembina-p").innerText = stats.pembina.P;
+
+                    animateValue("stat-baptis-sudah", stats.baptisSudah.total);
+                    document.getElementById("stat-baptis-sudah-l").innerText = stats.baptisSudah.L;
+                    document.getElementById("stat-baptis-sudah-p").innerText = stats.baptisSudah.P;
+
+                    animateValue("stat-baptis-belum", stats.baptisBelum.total);
+                    document.getElementById("stat-baptis-belum-l").innerText = stats.baptisBelum.L;
+                    document.getElementById("stat-baptis-belum-p").innerText = stats.baptisBelum.P;
+
+                    renderChart(stats.historyDates, stats.historyCounts);
+                }
+            } catch (err) {
+                console.error("Gagal load statistik", err);
+            }
+        }
+
+        function animateValue(id, end) {
+            const obj = document.getElementById(id);
+            if(!obj) return;
+            let startTimestamp = null;
+            const duration = 1000;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * end);
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            
+            if (APP_STATE.chartInstance) {
+                APP_STATE.chartInstance.destroy();
+            }
+
+            // Jika kosong, beri dummy data
+            if(labels.length === 0) {
+                labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+                data = [0,0,0,0,0,0,0];
+            }
+
+            APP_STATE.chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pendaftar Baru',
+                        data: data,
+                        borderColor: '#fbbf24',
+                        backgroundColor: 'rgba(251, 191, 36, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#9ca3af', stepSize: 1 } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+        }
+
+        async function fetchParticipants() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8"><div class="loader mb-2"></div><br>Mengambil data dari server...</td></tr>`;
+            
+            try {
+                const res = await fetch(`${APP_STATE.dbUrl}?action=getParticipants&t=${Date.now()}`);
+                const result = await res.json();
+                
+                if (result.status === 'success') {
+                    APP_STATE.rawParticipantsData = result.data; // Simpan ke state
+                    renderTable(APP_STATE.rawParticipantsData);
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-red-400">Gagal memuat data: ${result.message}</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-red-400">Terjadi kesalahan koneksi.</td></tr>`;
+            }
+        }
+
+        function renderTable(dataArray) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (dataArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-gray-400">Belum ada data pendaftar.</td></tr>`;
                 return;
             }
 
-            state.slides.forEach((url, index) => {
+            // Urutkan dari yang terbaru (asumsi baris terbesar adalah terbaru)
+            const sortedData = [...dataArray].reverse();
+
+            sortedData.forEach((row, i) => {
+                // row format mapping (berdasarkan tutorial GAS sebelumnya):
+                // row[0] = row index database, row[1] = Timestamp, row[2] = Nama, row[3] = Panggilan, row[4] = Tempat Lahir, row[5] = Tgl Lahir
+                // row[6] = Gender, row[7] = Fungsi, row[8] = Area, row[9] = WA, row[10] = Email, row[11] = Baptis, row[12] = PKS
+                
+                const tglDaftar = new Date(row[1]).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
+                const rowId = row[0];
+                
+                // Mencegah error jika data WA adalah Number di Google Sheets
+                const safeWaNumber = String(row[9] || '').replace(/^0/, '62');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-gray-400">${sortedData.length - i}</td>
+                    <td class="text-xs">${tglDaftar}</td>
+                    <td class="font-semibold text-white whitespace-nowrap">${row[2]}</td>
+                    <td class="text-gray-300">${row[3]}</td>
+                    <td><span class="px-2 py-1 rounded text-xs ${row[7] === 'Pembina' ? 'bg-amber-500 bg-opacity-20 text-amber-400' : 'bg-blue-500 bg-opacity-20 text-blue-400'}">${row[7]}</span></td>
+                    <td><span class="px-2 py-1 rounded text-xs ${row[11] === 'Sudah' ? 'bg-emerald-500 bg-opacity-20 text-emerald-400' : 'bg-red-500 bg-opacity-20 text-red-400'}">${row[11]}</span></td>
+                    <td class="text-gray-300">${row[8]}</td>
+                    <td class="text-gray-300">${row[12]}</td>
+                    <td class="text-gray-300"><a href="https://wa.me/${safeWaNumber}" target="_blank" class="hover:text-green-400 flex items-center gap-1"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.571-.012c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>${safeWaNumber}</a></td>
+                    <td class="text-center">
+                        <button onclick="openEditModal(${rowId})" class="p-2 bg-gray-700 hover:bg-amber-500 hover:text-gray-900 rounded-lg transition-colors text-white" title="Edit Data">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const query = document.getElementById('search-data').value.toLowerCase();
+            const filtered = APP_STATE.rawParticipantsData.filter(row => row[2].toLowerCase().includes(query) || row[3].toLowerCase().includes(query));
+            renderTable(filtered);
+        }
+
+        function openEditModal(rowId) {
+            // Find row data
+            const rowData = APP_STATE.rawParticipantsData.find(r => r[0] == rowId);
+            if(!rowData) return;
+
+            document.getElementById('edit-row').value = rowId;
+            document.getElementById('edit-nama').value = rowData[2];
+            document.getElementById('edit-panggilan').value = rowData[3];
+            
+            // Format tgl untuk input date (YYYY-MM-DD)
+            try {
+                const rawDate = new Date(rowData[5]);
+                document.getElementById('edit-tgl').value = rawDate.toISOString().split('T')[0];
+            } catch(e) { document.getElementById('edit-tgl').value = ""; }
+
+            document.getElementById('edit-fungsi').value = rowData[7];
+            document.getElementById('edit-area').value = rowData[8];
+            document.getElementById('edit-wa').value = rowData[9];
+            document.getElementById('edit-baptis').value = rowData[11];
+            document.getElementById('edit-pks').value = rowData[12];
+
+            editModal.classList.remove('hidden-view');
+        }
+
+        async function submitEditForm(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-save-edit');
+            btn.innerHTML = `<div class="loader w-4 h-4 border-gray-900 border-t-white mr-2"></div> Menyimpan...`;
+            btn.disabled = true;
+
+            const params = new URLSearchParams();
+            params.append('action', 'updateParticipant');
+            params.append('rowId', document.getElementById('edit-row').value);
+            params.append('namaLengkap', document.getElementById('edit-nama').value);
+            params.append('namaPanggilan', document.getElementById('edit-panggilan').value);
+            params.append('tanggalLahir', document.getElementById('edit-tgl').value);
+            params.append('fungsi', document.getElementById('edit-fungsi').value);
+            params.append('areaIbadah', document.getElementById('edit-area').value);
+            params.append('noWa', document.getElementById('edit-wa').value);
+            params.append('statusBaptisan', document.getElementById('edit-baptis').value);
+            params.append('pks', document.getElementById('edit-pks').value);
+
+            try {
+                const res = await fetch(APP_STATE.dbUrl, { method: 'POST', body: params });
+                const result = await res.json();
+                
+                if(result.status === 'success') {
+                    closeEditModal();
+                    showModal("Berhasil", "Data peserta telah diperbarui.", false, `<button onclick="closeModal(); fetchParticipants()" class="px-6 py-2 bg-emerald-500 rounded-lg text-white font-bold">Oke</button>`);
+                } else {
+                    showModal("Gagal Update", result.message, true);
+                }
+            } catch (err) {
+                showModal("Error", "Gagal menghubungi server database.", true);
+            } finally {
+                btn.innerHTML = `Simpan Perubahan`;
+                btn.disabled = false;
+            }
+        }
+
+        async function fetchSchedule() {
+            try {
+                const res = await fetch(`${APP_STATE.dbUrl}?action=getSchedule&t=${Date.now()}`);
+                const data = await res.json();
+                if(data.status === 'success') {
+                    APP_STATE.rawScheduleData = data.data;
+                    renderScheduleCards();
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function prepareAbsenTab() {
+            // Memastikan data jadwal & peserta sudah ter-load
+            if(APP_STATE.rawScheduleData.length === 0) await fetchSchedule();
+            if(APP_STATE.rawParticipantsData.length === 0) await fetchParticipants();
+            
+            const select = document.getElementById('absen-jadwal-select');
+            select.innerHTML = '<option value="">Pilih Jadwal Kelas...</option>';
+            APP_STATE.rawScheduleData.forEach(item => {
+                // item[0] = Tgl, item[1] = Topik
+                const optVal = `${item[0]} - ${item[1]}`; 
+                select.innerHTML += `<option value="${optVal}">${optVal}</option>`;
+            });
+        }
+        
+        async function fetchAbsensi() {
+            const jadwal = document.getElementById('absen-jadwal-select').value;
+            const tbody = document.getElementById('absen-table-body');
+            
+            if(!jadwal) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-400 py-12">Pilih jadwal kelas terlebih dahulu</td></tr>`;
+                document.getElementById('absen-total-hadir').innerText = '0';
+                return;
+            }
+            
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8"><div class="loader mb-2"></div><br>Menarik data kehadiran dari server...</td></tr>`;
+            
+            try {
+                const res = await fetch(`${APP_STATE.dbUrl}?action=getAttendance&jadwal=${encodeURIComponent(jadwal)}&t=${Date.now()}`);
+                const result = await res.json();
+                
+                // Masukkan data hadir dari database (Array ID) ke dalam Set JS
+                APP_STATE.currentAbsenData = new Set(result.data || []);
+                renderAbsensiTable();
+                
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-red-400">Gagal memuat data absensi. Silakan coba lagi.</td></tr>`;
+            }
+        }
+        
+        function renderAbsensiTable() {
+            const tbody = document.getElementById('absen-table-body');
+            const jadwal = document.getElementById('absen-jadwal-select').value;
+            
+            if(!jadwal) return;
+            
+            let dataArr = APP_STATE.rawParticipantsData;
+            
+            // Terapkan Filter Pencarian
+            const searchQ = document.getElementById('search-absen').value.toLowerCase();
+            if(searchQ) {
+                dataArr = dataArr.filter(r => r[2].toLowerCase().includes(searchQ) || r[3].toLowerCase().includes(searchQ));
+            }
+            
+            // Terapkan Filter Fungsi (Peserta / Pembina)
+            const fungsiF = document.getElementById('filter-absen-fungsi').value;
+            if(fungsiF !== "Semua") {
+                dataArr = dataArr.filter(r => r[7] === fungsiF);
+            }
+            
+            tbody.innerHTML = '';
+            
+            if (dataArr.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-400">Tidak ada data yang cocok dengan pencarian.</td></tr>`;
+                return;
+            }
+            
+            // Urutkan Nama dari A - Z agar mudah mengabsen
+            const sortedData = [...dataArr].sort((a,b) => a[2].localeCompare(b[2]));
+            
+            sortedData.forEach((row, i) => {
+                const rowId = row[0];
+                const isChecked = APP_STATE.currentAbsenData.has(rowId) ? 'checked' : '';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-center text-gray-400">${i+1}</td>
+                    <td class="text-center">
+                        <input type="checkbox" onchange="toggleAbsen(${rowId}, this.checked)" class="w-6 h-6 text-emerald-500 bg-gray-800 border-gray-600 rounded focus:ring-emerald-500 focus:ring-2 cursor-pointer transition-all hover:scale-110" ${isChecked}>
+                    </td>
+                    <td class="font-semibold text-white whitespace-nowrap cursor-pointer hover:text-emerald-400 transition-colors" onclick="const cb=this.previousElementSibling.querySelector('input'); cb.checked=!cb.checked; toggleAbsen(${rowId}, cb.checked);">${row[2]}</td>
+                    <td class="text-gray-300">${row[3]}</td>
+                    <td><span class="px-2 py-1 rounded text-xs ${row[7] === 'Pembina' ? 'bg-amber-500 bg-opacity-20 text-amber-400' : 'bg-blue-500 bg-opacity-20 text-blue-400'}">${row[7]}</span></td>
+                    <td class="text-gray-300">${row[8]}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            updateAbsenCounter();
+        }
+        
+        function toggleAbsen(rowId, isHadir) {
+            if(isHadir) {
+                APP_STATE.currentAbsenData.add(rowId);
+            } else {
+                APP_STATE.currentAbsenData.delete(rowId);
+            }
+            updateAbsenCounter();
+        }
+        
+        function updateAbsenCounter() {
+            document.getElementById('absen-total-hadir').innerText = APP_STATE.currentAbsenData.size;
+        }
+        
+        async function saveAbsensi() {
+            const jadwal = document.getElementById('absen-jadwal-select').value;
+            if(!jadwal) {
+                showModal("Perhatian", "Silakan pilih jadwal kelas terlebih dahulu dari pilihan di atas.", true);
+                return;
+            }
+            
+            const btn = document.getElementById('btn-save-absen');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<div class="loader w-4 h-4 border-gray-900 border-t-white mr-2"></div> Menyimpan...`;
+            btn.disabled = true;
+            
+            // Konversi dari JS Set ke Array agar bisa dikirim sebagai JSON string
+            const arrayHadir = Array.from(APP_STATE.currentAbsenData);
+            
+            const params = new URLSearchParams();
+            params.append('action', 'saveAttendance');
+            params.append('jadwal', jadwal);
+            params.append('dataHadir', JSON.stringify(arrayHadir));
+            
+            try {
+                const res = await fetch(APP_STATE.dbUrl, { method: 'POST', body: params });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    showModal("Berhasil", `Data kehadiran untuk kelas <b>${jadwal}</b> berhasil disimpan!`, false);
+                } else {
+                    showModal("Gagal", result.message || "Gagal menyimpan data absensi", true);
+                }
+            } catch(e) {
+                showModal("Error", "Gagal menghubungi server database.", true);
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        function renderScheduleCards() {
+            const container = document.getElementById('jadwal-container');
+            container.innerHTML = '';
+            
+            if(APP_STATE.rawScheduleData.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center text-gray-400">Jadwal belum dikonfigurasi. Silakan tambah di menu Settings.</div>`;
+                return;
+            }
+
+            APP_STATE.rawScheduleData.forEach((item, index) => {
+                // item: [Tanggal, Topik, Pembicara, Keterangan]
+                container.innerHTML += `
+                    <div class="bg-gray-800 bg-opacity-50 p-4 rounded-xl border border-gray-700 hover:border-amber-500 transition-colors">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="px-2 py-1 bg-amber-500 text-gray-900 text-xs font-bold rounded">Sesi ${index + 1}</span>
+                            <span class="text-xs text-gray-400 font-mono">${item[0]}</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white leading-tight mb-1">${item[1] || 'Topik Belum Ditentukan'}</h4>
+                        <p class="text-sm text-amber-400 mb-3"><span class="text-gray-400">Oleh:</span> ${item[2] || '-'}</p>
+                        ${item[3] ? `<p class="text-xs text-gray-400 bg-black bg-opacity-30 p-2 rounded">${item[3]}</p>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        async function fetchSettings() {
+            // Setup Logo input & DB URL
+            const logoEl = document.getElementById('sidebar-logo');
+            document.getElementById('setting-logo-url').value = logoEl.src;
+            document.getElementById('setting-db-url').value = APP_STATE.dbUrl;
+
+            // Load Accounts & Schedule for Editing
+            try {
+                // 1. Fetch Accounts
+                const resAcc = await fetch(`${APP_STATE.dbUrl}?action=getAccounts&t=${Date.now()}`);
+                const dataAcc = await resAcc.json();
+                const tbody = document.getElementById('accounts-table-body');
+                tbody.innerHTML = '';
+                
+                if(dataAcc.status === 'success') {
+                    dataAcc.data.forEach(acc => {
+                        // acc: [rowIndex, username, password]
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="font-semibold text-gray-300">${acc[1]}</td>
+                                <td class="text-gray-500 font-mono">••••••••</td>
+                                <td class="text-right">
+                                    <button onclick="deleteAccount(${acc[0]})" class="px-3 py-1 bg-red-500 bg-opacity-20 text-red-400 rounded hover:bg-opacity-40 text-xs transition-colors" ${dataAcc.data.length <= 1 ? 'disabled title="Minimal harus ada 1 admin"' : ''}>Hapus</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                // 2. Prepare Schedule editor
+                await fetchSchedule(); // ensures data is loaded
+                renderScheduleEditor();
+
+            } catch(e) { console.error("Error loading settings"); }
+        }
+
+        function renderScheduleEditor() {
+            const container = document.getElementById('schedule-edit-container');
+            container.innerHTML = '';
+            
+            APP_STATE.rawScheduleData.forEach((item, idx) => {
                 const div = document.createElement('div');
-                div.className = `carousel-slide ${index === state.slideIndex ? 'active' : ''}`;
-                div.innerHTML = `<img src="${url}" alt="Pengumuman ${index + 1}" onerror="this.src='https://placehold.co/800x800/333/fff?text=Gambar+Gagal+Dimuat'">`;
+                div.className = "flex flex-col md:flex-row gap-2 bg-gray-900 bg-opacity-50 p-3 rounded-lg border border-gray-700 schedule-row";
+                div.innerHTML = `
+                    <input type="text" placeholder="Tanggal (Contoh: 12 Ags 2026)" value="${item[0] || ''}" class="form-input flex-1 px-3 py-2 rounded text-sm sched-tgl">
+                    <input type="text" placeholder="Topik Materi" value="${item[1] || ''}" class="form-input flex-2 w-full md:w-1/3 px-3 py-2 rounded text-sm sched-topik">
+                    <input type="text" placeholder="Pembicara" value="${item[2] || ''}" class="form-input flex-1 px-3 py-2 rounded text-sm sched-pembicara">
+                    <button onclick="this.parentElement.remove()" class="px-3 py-2 bg-red-900 text-red-300 rounded hover:bg-red-800" title="Hapus Baris"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                `;
                 container.appendChild(div);
             });
         }
 
-        function changeSlide(n) {
-            if(state.slides.length <= 1) return;
-            
-            const slidesElements = document.querySelectorAll('.carousel-slide');
-            slidesElements[state.slideIndex].classList.remove('active');
-            
-            state.slideIndex += n;
-            
-            if (state.slideIndex >= state.slides.length) state.slideIndex = 0;
-            if (state.slideIndex < 0) state.slideIndex = state.slides.length - 1;
-            
-            slidesElements[state.slideIndex].classList.add('active');
+        function addScheduleRow() {
+            const container = document.getElementById('schedule-edit-container');
+            const div = document.createElement('div');
+            div.className = "flex flex-col md:flex-row gap-2 bg-gray-900 bg-opacity-50 p-3 rounded-lg border border-gray-700 schedule-row";
+            div.innerHTML = `
+                <input type="text" placeholder="Tanggal" class="form-input flex-1 px-3 py-2 rounded text-sm sched-tgl">
+                <input type="text" placeholder="Topik Materi" class="form-input flex-2 w-full md:w-1/3 px-3 py-2 rounded text-sm sched-topik">
+                <input type="text" placeholder="Pembicara" class="form-input flex-1 px-3 py-2 rounded text-sm sched-pembicara">
+                <button onclick="this.parentElement.remove()" class="px-3 py-2 bg-red-900 text-red-300 rounded hover:bg-red-800"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+            `;
+            container.appendChild(div);
         }
 
-        async function fetchSlides() {
-            const container = document.getElementById('carousel-slides-container');
-            container.innerHTML = `<div class="text-center py-10 text-gray-400"><div class="loader mb-2"></div><p>Memuat pengumuman dari server...</p></div>`;
+        async function saveSchedule() {
+            showLoadingBox("Menyimpan jadwal ke database...");
             
-            try {
-                // Tambahkan parameter waktu (t) untuk mencegah browser membaca cache error (Cache Buster)
-                const fetchUrl = `${state.scriptUrl}?action=getSlides&t=${new Date().getTime()}`;
-                
-                const response = await fetch(fetchUrl);
-                if (!response.ok) throw new Error("HTTP Error: " + response.status);
-                
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    state.slides = result.data;
-                }
-            } catch (error) {
-                console.warn("Koneksi ke database bermasalah:", error.message);
-                state.slides = [
-                    "https://placehold.co/800x800/1e293b/ef4444?text=Koneksi+Gagal",
-                    "https://placehold.co/800x800/1e293b/fbbf24?text=Pastikan+Akses+Web+App+di-set+'Anyone'"
-                ];
-            }
-            
-            renderCarousel();
-            
-            // Jika admin sedang buka dashboard, perbarui juga listnya
-            if (state.currentView === 'view-admin-dashboard') {
-                renderAdminDashboard();
-            }
-        }
-
-        // Auto slide every 5 seconds
-        setInterval(() => {
-            if(state.currentView === 'view-landing' && state.slides.length > 1) {
-                changeSlide(1);
-            }
-        }, 5000);
-
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            
-            const btnSubmit = document.getElementById('btn-submit');
-            const loader = document.getElementById('submit-loader');
-            const btnText = btnSubmit.querySelector('span');
-
-            // 1. Ambil Data
-            const formData = {
-                namaLengkap: document.getElementById('namaLengkap').value,
-                namaPanggilan: document.getElementById('namaPanggilan').value,
-                tempatLahir: document.getElementById('tempatLahir').value,
-                tanggalLahir: document.getElementById('tanggalLahir').value,
-                jenisKelamin: document.getElementById('jenisKelamin').value,
-                fungsi: document.getElementById('fungsi').value,
-                areaIbadah: document.getElementById('areaIbadah').value,
-                noWa: document.getElementById('noWa').value,
-                email: document.getElementById('email').value,
-                statusBaptisan: document.getElementById('statusBaptisan').value,
-                pks: document.getElementById('pks').value
-            };
-
-            // Loading state
-            btnSubmit.disabled = true;
-            btnText.innerText = 'Mengirim...';
-            loader.classList.remove('hidden-view');
-
-            try {
-                // 2. Kirim Data ke Google Apps Script (Jika URL sudah diset)
-                if (state.scriptUrl && state.scriptUrl.startsWith('https://script.google.com/')) {
-                    
-                    // Gunakan x-www-form-urlencoded untuk kompatibilitas doPost GAS sederhana
-                    const formParams = new URLSearchParams();
-                    for (const key in formData) {
-                        formParams.append(key, formData[key]);
-                    }
-
-                    // Menambahkan mode: 'no-cors' agar tidak terblokir oleh browser (Cross-Origin)
-                    await fetch(state.scriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: formParams
-                    }).catch(err => console.warn('Peringatan pengiriman (diabaikan secara lokal):', err));
-                    
-                } else {
-                    console.warn("Script URL belum dikonfigurasi. Menjalankan mode simulasi.");
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                }
-
-                // 3. Tampilkan Notifikasi Sukses Sesuai Permintaan
-                const successMsg = `
-                    Terima kasih telah mengisi form, data anda berhasil di simpan.<br><br>
-                    <span class="font-semibold text-white italic">"KETERBUKAAN ADALAH AWAL DARI PEMULIHAN"</span>
-                `;
-                showModal("Berhasil!", successMsg, true);
-                
-                // Reset form & kembali
-                document.getElementById('registration-form').reset();
-                setTimeout(() => {
-                    closeModal();
-                    switchView('view-landing');
-                }, 4000);
-
-            } catch (error) {
-                console.error('Error submitting form:', error);
-                showModal("Terjadi Kesalahan", "Gagal mengirim data. Pastikan koneksi internet stabil.");
-            } finally {
-                // Reset button state
-                btnSubmit.disabled = false;
-                btnText.innerText = 'Kirim Pendaftaran';
-                loader.classList.add('hidden-view');
-            }
-        }
-
-        async function handleAdminLogin(e) {
-            e.preventDefault();
-            const passInput = document.getElementById('adminPassword');
-            const pass = passInput.value;
-            const btn = e.target.querySelector('button');
-            const originalBtnText = btn.innerText;
-            
-            // Tampilan Loading
-            btn.innerText = 'Memeriksa ke Database...';
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-
-            try {
-                const fetchUrl = `${state.scriptUrl}?action=login&password=${encodeURIComponent(pass)}&t=${new Date().getTime()}`;
-                const response = await fetch(fetchUrl);
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    passInput.value = '';
-                    switchView('view-admin-dashboard');
-                } else {
-                    showModal("Akses Ditolak", "Password yang Anda masukkan salah.");
-                }
-            } catch (error) {
-                showModal(
-                    "Koneksi Gagal", 
-                    "Gagal menghubungi database.<br><br><span class='text-sm text-gray-300'><b>TIPS:</b> Pastikan di Google Apps Script bagian <b>Who has access</b> di-set ke <b>Anyone</b>, dan Anda sudah melakukan otorisasi script (Run pertama kali).</span>"
-                );
-            } finally {
-                btn.innerText = originalBtnText;
-                btn.disabled = false;
-                btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-        }
-
-        function renderAdminDashboard() {
-            // Load Script URL
-            document.getElementById('scriptUrlInput').value = state.scriptUrl;
-            
-            // Load Slides
-            const list = document.getElementById('admin-slides-list');
-            list.innerHTML = '';
-            
-            state.slides.forEach((url, index) => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center justify-between p-3 bg-gray-800 rounded-lg';
-                item.innerHTML = `
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <img src="${url}" class="w-12 h-12 object-cover rounded bg-gray-900" onerror="this.src='https://placehold.co/100x100?text=Error'">
-                        <span class="text-xs text-gray-400 truncate w-32 md:w-64">${url}</span>
-                    </div>
-                    <button onclick="removeSlide(${index})" class="text-red-400 hover:text-red-300 p-2 text-sm font-semibold">Hapus</button>
-                `;
-                list.appendChild(item);
+            const rows = document.querySelectorAll('.schedule-row');
+            let scheduleArray = [];
+            rows.forEach(r => {
+                const tgl = r.querySelector('.sched-tgl').value;
+                const topik = r.querySelector('.sched-topik').value;
+                const pembicara = r.querySelector('.sched-pembicara').value;
+                if(tgl || topik) scheduleArray.push([tgl, topik, pembicara]);
             });
-        }
 
-        function saveScriptUrl() {
-            const url = document.getElementById('scriptUrlInput').value.trim();
-            state.scriptUrl = url;
-            localStorage.setItem('spk_scriptUrl', url);
-            showModal("Tersimpan", "URL Database berhasil diperbarui.", true);
-        }
-
-        async function addSlide() {
-            const input = document.getElementById('newSlideUrl');
-            const url = input.value.trim();
-            if (!url) return;
-            
-            const btn = event.target;
-            const originalText = btn.innerText;
-            btn.innerText = 'Menyimpan...';
-            btn.disabled = true;
+            const params = new URLSearchParams();
+            params.append('action', 'updateSchedule');
+            params.append('data', JSON.stringify(scheduleArray));
 
             try {
-                // Menyimpan slide baru ke database (dengan cache buster)
-                const fetchUrl = `${state.scriptUrl}?action=addSlide&url=${encodeURIComponent(url)}&t=${new Date().getTime()}`;
-                const response = await fetch(fetchUrl);
-                const result = await response.json();
-                
+                const res = await fetch(APP_STATE.dbUrl, { method: 'POST', body: params });
+                const result = await res.json();
                 if(result.status === 'success') {
-                    input.value = '';
-                    await fetchSlides(); // Refresh data dari server
-                    showModal("Berhasil", "Pengumuman berhasil ditambahkan.", true);
+                    showModal("Berhasil", "Jadwal berhasil diperbarui.", false, `<button onclick="closeModal()" class="px-6 py-2 bg-emerald-500 rounded text-white font-bold">Oke</button>`);
                 }
-            } catch(e) {
-                showModal("Gagal", "Tidak dapat menyimpan pengumuman. Periksa koneksi.");
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+            } catch(e) { showModal("Gagal", "Tidak dapat menyimpan jadwal", true); }
         }
 
-        async function removeSlide(index) {
-            // Tampilkan modal loading
-            const modalTitle = document.getElementById('modal-title');
-            const modalMessage = document.getElementById('modal-message');
-            
-            modalTitle.innerText = "Memproses";
-            modalTitle.className = "text-2xl font-bold mb-4 text-emerald-400";
-            modalMessage.innerHTML = "Sedang menghapus pengumuman dari database...";
-            modal.classList.remove('hidden-view');
-            
+        async function addAccount(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '...'; btn.disabled = true;
+
+            const u = document.getElementById('new-acc-user').value;
+            const p = document.getElementById('new-acc-pass').value;
+
+            const params = new URLSearchParams();
+            params.append('action', 'manageAccount');
+            params.append('subAction', 'add');
+            params.append('username', u);
+            params.append('password', p);
+
             try {
-                // Menghapus slide dari database (dengan cache buster)
-                const fetchUrl = `${state.scriptUrl}?action=deleteSlide&index=${index}&t=${new Date().getTime()}`;
-                const response = await fetch(fetchUrl);
-                const result = await response.json();
-                
-                if(result.status === 'success') {
-                    await fetchSlides(); // Refresh data dari server
-                    closeModal();
-                }
-            } catch(e) {
-                showModal("Gagal", "Tidak dapat menghapus pengumuman.");
-            }
+                await fetch(APP_STATE.dbUrl, { method: 'POST', body: params });
+                document.getElementById('new-acc-user').value = '';
+                document.getElementById('new-acc-pass').value = '';
+                fetchSettings(); // reload table
+            } catch(e) { alert("Error"); }
+            btn.innerHTML = 'Tambah Akun'; btn.disabled = false;
         }
 
-        // Initialize App
-        fetchSlides();
+        async function deleteAccount(rowId) {
+            if(!confirm("Yakin ingin menghapus akun ini?")) return;
+            
+            const params = new URLSearchParams();
+            params.append('action', 'manageAccount');
+            params.append('subAction', 'delete');
+            params.append('rowId', rowId);
+
+            try {
+                await fetch(APP_STATE.dbUrl, { method: 'POST', body: params });
+                fetchSettings(); // reload table
+            } catch(e) { alert("Error"); }
+        }
+
+        function updateLogo() {
+            const url = document.getElementById('setting-logo-url').value;
+            if(!url) return;
+            document.getElementById('sidebar-logo').src = url;
+            document.getElementById('login-logo').src = url;
+            // Dalam mode produksi, Anda perlu mengirim URL ini via POST ke Apps Script
+            // Namun karena hanya dekoratif untuk dashboard admin lokal, kita bisa menyimpannya sementara.
+            showModal("Berhasil", "Pratinjau logo telah diubah (Sistem Cache lokal).", false);
+        }
+
     </script>
 </body>
 </html>
