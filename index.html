@@ -136,7 +136,7 @@
         </div>
     </main>
 
-    <!-- HALAMAN LOGIN ADMIN (FORM SETTINGS) -->
+    <!-- HALAMAN LOGIN ADMIN -->
     <main id="view-admin-login" class="w-full max-w-md px-4 py-12 flex-grow hidden-view flex flex-col justify-center">
         <div class="glass-card p-8 rounded-3xl text-center">
             <h2 class="text-2xl font-bold mb-6 text-white">Admin Pengumuman</h2>
@@ -148,7 +148,7 @@
         </div>
     </main>
 
-    <!-- HALAMAN DASHBOARD SLIDER (FORM SETTINGS) -->
+    <!-- HALAMAN DASHBOARD SLIDER -->
     <main id="view-admin-dashboard" class="w-full max-w-4xl px-4 py-8 flex-grow hidden-view">
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-bold text-amber-400">Pengaturan Pengumuman</h2>
@@ -164,7 +164,6 @@
         </div>
     </main>
 
-    <!-- FOOTER ADMIN -->
     <footer class="w-full text-center py-4 text-gray-500 text-xs mt-auto">
         &copy; 2026 SPK Pemenang. <span onclick="switchView('view-admin-login')" class="cursor-pointer hover:text-gray-300">Admin</span>
     </footer>
@@ -190,7 +189,6 @@
             document.getElementById('modal-message').innerHTML = message;
             modal.classList.remove('hidden-view');
         }
-
         function closeModal() { modal.classList.add('hidden-view'); }
 
         function renderCarousel() {
@@ -222,13 +220,20 @@
             const container = document.getElementById('carousel-slides-container');
             container.innerHTML = `<div class="text-center py-10 text-gray-400"><div class="loader mb-2"></div><p>Memuat pengumuman...</p></div>`;
             
-            google.script.run.withSuccessHandler(function(res) {
-                if (res.status === 'success') {
-                    state.slides = res.data;
-                    renderCarousel();
-                    if (state.currentView === 'view-admin-dashboard') renderAdminDashboard();
-                }
-            }).getSlides();
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    if (res && res.status === 'success') {
+                        state.slides = res.data;
+                        renderCarousel();
+                        if (state.currentView === 'view-admin-dashboard') renderAdminDashboard();
+                    } else {
+                        container.innerHTML = `<div class="text-center py-10 text-red-400">Gagal mengambil data.</div>`;
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    container.innerHTML = `<div class="text-center py-10 text-red-400">Menunggu Otorisasi Google Script.<br><span class="text-xs">Buka Code.gs dan klik Run untuk otorisasi.</span></div>`;
+                })
+                .getSlides();
         }
 
         setInterval(() => { if(state.currentView === 'view-landing') changeSlide(1); }, 5000);
@@ -253,32 +258,37 @@
             google.script.run
                 .withSuccessHandler(function(res) {
                     btn.disabled = false; btn.querySelector('span').innerText = 'Kirim Pendaftaran'; loader.classList.add('hidden-view');
-                    if(res.success) {
+                    if(res && res.success) {
                         showModal("Berhasil!", "Terima kasih, data anda berhasil disimpan.<br><br><span class='italic text-white'>\"KETERBUKAAN ADALAH AWAL DARI PEMULIHAN\"</span>", true);
                         document.getElementById('registration-form').reset();
                         setTimeout(() => { closeModal(); switchView('view-landing'); }, 4000);
-                    } else { showModal("Gagal", "Sistem merespon: " + res.message); }
+                    } else { showModal("Gagal", "Sistem merespon: " + (res ? res.message : 'Unknown error')); }
                 })
-                .withFailureHandler(function() {
+                .withFailureHandler(function(err) {
                     btn.disabled = false; btn.querySelector('span').innerText = 'Kirim Pendaftaran'; loader.classList.add('hidden-view');
-                    showModal("Koneksi Error", "Terjadi kegagalan jaringan, silakan coba lagi.");
+                    showModal("Koneksi Error", err.message);
                 }).submitRegistration(data);
         }
 
-        // ================= KODE ADMIN SLIDER =================
         function handleAdminLogin(e) {
             e.preventDefault();
             const pass = document.getElementById('adminPassword').value;
             const btn = e.target.querySelector('button');
             btn.innerText = 'Memeriksa...'; btn.disabled = true;
 
-            google.script.run.withSuccessHandler(function(res) {
-                btn.innerText = 'Login'; btn.disabled = false;
-                if(res.success) {
-                    document.getElementById('adminPassword').value = '';
-                    switchView('view-admin-dashboard');
-                } else { showModal("Akses Ditolak", "Password salah."); }
-            }).verifyFormAdmin(pass);
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    btn.innerText = 'Login'; btn.disabled = false;
+                    if(res && res.success) {
+                        document.getElementById('adminPassword').value = '';
+                        switchView('view-admin-dashboard');
+                    } else { showModal("Akses Ditolak", "Password salah atau tidak ditemukan."); }
+                })
+                .withFailureHandler(function(err) {
+                    btn.innerText = 'Login'; btn.disabled = false;
+                    showModal("Database Error", "Belum Otorisasi Google Script.<br>Pesan: " + err.message);
+                })
+                .verifyFormAdmin(pass);
         }
 
         function renderAdminDashboard() {
@@ -296,19 +306,30 @@
             const url = document.getElementById('newSlideUrl').value;
             if(!url) return;
             e.target.innerText = "Menyimpan..."; e.target.disabled = true;
-            google.script.run.withSuccessHandler(function() {
-                document.getElementById('newSlideUrl').value = '';
-                e.target.innerText = "Tambah"; e.target.disabled = false;
-                fetchSlides();
-                showModal("Tersimpan", "Gambar berhasil ditambahkan.", true);
-            }).addSlide(url);
+            google.script.run
+                .withSuccessHandler(function() {
+                    document.getElementById('newSlideUrl').value = '';
+                    e.target.innerText = "Tambah"; e.target.disabled = false;
+                    fetchSlides();
+                    showModal("Tersimpan", "Gambar berhasil ditambahkan.", true);
+                })
+                .withFailureHandler(function(err) {
+                    e.target.innerText = "Tambah"; e.target.disabled = false;
+                    showModal("Error", err.message);
+                })
+                .addSlide(url);
         }
 
         function removeSlide(index) {
             showModal("Memproses...", "Menghapus pengumuman...", true);
-            google.script.run.withSuccessHandler(function() {
-                closeModal(); fetchSlides();
-            }).deleteSlide(index);
+            google.script.run
+                .withSuccessHandler(function() {
+                    closeModal(); fetchSlides();
+                })
+                .withFailureHandler(function(err) {
+                    showModal("Error", err.message);
+                })
+                .deleteSlide(index);
         }
     </script>
 </body>
