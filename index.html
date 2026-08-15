@@ -91,81 +91,32 @@
                     <div><label class="block text-sm text-gray-300 mb-1">Tempat Lahir *</label><input type="text" id="tempatLahir" required class="form-input w-full px-4 py-3 rounded-xl"></div>
                     <div><label class="block text-sm text-gray-300 mb-1">Tanggal Lahir *</label><input type="date" id="tanggalLahir" required class="form-input w-full px-4 py-3 rounded-xl text-white" style="color-scheme: dark;"></div>
                 </div>
-
                 <div>
                     <label class="block text-sm text-gray-300 mb-1">Jenis Kelamin *</label>
-                    <select id="jenisKelamin" required class="form-select w-full px-4 py-3 rounded-xl">
-                        <option value="" disabled selected>Pilih Jenis Kelamin</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option>
-                    </select>
+                    <select id="jenisKelamin" required class="form-select w-full px-4 py-3 rounded-xl"><option value="" disabled selected>Pilih Jenis Kelamin</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div><label class="block text-sm text-gray-300 mb-1">No WA Aktif *</label><input type="tel" id="noWa" required class="form-input w-full px-4 py-3 rounded-xl"></div>
                     <div><label class="block text-sm text-gray-300 mb-1">Email *</label><input type="email" id="email" required class="form-input w-full px-4 py-3 rounded-xl"></div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm text-gray-300 mb-1">Fungsi *</label>
-                        <select id="fungsi" required class="form-select w-full px-4 py-3 rounded-xl">
-                            <option value="" disabled selected>Pilih Fungsi</option><option value="Peserta">Peserta</option><option value="Pembina">Pembina</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-300 mb-1">Area Ibadah *</label>
-                        <select id="areaIbadah" required class="form-select w-full px-4 py-3 rounded-xl">
-                            <option value="" disabled selected>Pilih Area</option><option value="Umum">Umum</option><option value="Youth Pro">Youth Pro</option><option value="Youth Teens">Youth Teens</option><option value="Abbakids">Abbakids</option><option value="Tunas Bangsa">Tunas Bangsa</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-300 mb-1">Status Baptisan *</label>
-                        <select id="statusBaptisan" required class="form-select w-full px-4 py-3 rounded-xl">
-                            <option value="" disabled selected>Pilih Status</option><option value="Belum">Belum</option><option value="Sudah">Sudah</option>
-                        </select>
-                    </div>
+                    <div><label class="block text-sm text-gray-300 mb-1">Fungsi *</label><select id="fungsi" required class="form-select w-full px-4 py-3 rounded-xl"><option value="" disabled selected>Pilih Fungsi</option><option value="Peserta">Peserta</option><option value="Pembina">Pembina</option></select></div>
+                    <div><label class="block text-sm text-gray-300 mb-1">Area Ibadah *</label><select id="areaIbadah" required class="form-select w-full px-4 py-3 rounded-xl"><option value="" disabled selected>Pilih Area</option><option value="Umum">Umum</option><option value="Youth Pro">Youth Pro</option><option value="Youth Teens">Youth Teens</option><option value="Abbakids">Abbakids</option><option value="Tunas Bangsa">Tunas Bangsa</option></select></div>
+                    <div><label class="block text-sm text-gray-300 mb-1">Status Baptisan *</label><select id="statusBaptisan" required class="form-select w-full px-4 py-3 rounded-xl"><option value="" disabled selected>Pilih Status</option><option value="Belum">Belum</option><option value="Sudah">Sudah</option></select></div>
                     <div><label class="block text-sm text-gray-300 mb-1">PKS (Pembina Kelompok Sel) *</label><input type="text" id="pks" required class="form-input w-full px-4 py-3 rounded-xl"></div>
                 </div>
-
                 <div class="pt-6">
-                    <button type="submit" id="btn-submit" class="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-gray-900 font-bold text-lg rounded-xl flex items-center justify-center gap-2">
-                        <span>Kirim Pendaftaran</span>
-                        <div id="submit-loader" class="loader hidden-view"></div>
-                    </button>
+                    <button type="submit" id="btn-submit" class="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-gray-900 font-bold text-lg rounded-xl flex items-center justify-center gap-2"><span>Kirim Pendaftaran</span><div id="submit-loader" class="loader hidden-view"></div></button>
                 </div>
             </form>
         </div>
     </main>
 
-    <!-- HALAMAN LOGIN ADMIN -->
-    <main id="view-admin-login" class="w-full max-w-md px-4 py-12 flex-grow hidden-view flex flex-col justify-center">
-        <div class="glass-card p-8 rounded-3xl text-center">
-            <h2 class="text-2xl font-bold mb-6 text-white">Admin Pengumuman</h2>
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <input type="password" id="adminPassword" placeholder="Masukkan Password Admin" class="form-input w-full px-4 py-3 rounded-xl text-center" required>
-                <button type="submit" class="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl">Login</button>
-            </form>
-            <button onclick="switchView('view-landing')" class="mt-4 text-sm text-gray-400">Batal</button>
-        </div>
-    </main>
-
-    <!-- HALAMAN DASHBOARD SLIDER -->
-    <main id="view-admin-dashboard" class="w-full max-w-4xl px-4 py-8 flex-grow hidden-view">
-        <div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl font-bold text-amber-400">Pengaturan Pengumuman</h2>
-            <button onclick="switchView('view-landing')" class="px-4 py-2 bg-gray-800 rounded-lg text-sm">Keluar</button>
-        </div>
-        <div class="glass-card p-6 rounded-2xl w-full max-w-xl mx-auto">
-            <h3 class="text-xl font-semibold mb-4 text-white">Slide Pengumuman</h3>
-            <div class="flex gap-2 mb-4">
-                <input type="text" id="newSlideUrl" placeholder="URL Gambar (.jpg/.png)" class="form-input flex-grow px-4 py-2 rounded-xl text-sm">
-                <button onclick="addSlide(event)" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl">Tambah</button>
-            </div>
-            <div id="admin-slides-list" class="space-y-3 max-h-64 overflow-y-auto pr-2"></div>
-        </div>
-    </main>
-
+    <!-- FOOTER ADMIN (LINK KE DASHBOARD) -->
     <footer class="w-full text-center py-4 text-gray-500 text-xs mt-auto">
-        &copy; 2026 SPK Pemenang. <span onclick="switchView('view-admin-login')" class="cursor-pointer hover:text-gray-300">Admin</span>
+        &copy; 2026 SPK Pemenang. 
+        <!-- Tombol ini langsung memindahkan tab ke mode admin -->
+        <a href="?page=admin" class="cursor-pointer hover:text-gray-300">Admin</a>
     </footer>
 
     <script>
@@ -173,13 +124,10 @@
         const modal = document.getElementById('custom-modal');
 
         function switchView(viewId) {
-            ['view-landing', 'view-form', 'view-admin-login', 'view-admin-dashboard'].forEach(id => {
-                document.getElementById(id).classList.add('hidden-view');
-            });
+            ['view-landing', 'view-form'].forEach(id => document.getElementById(id).classList.add('hidden-view'));
             document.getElementById(viewId).classList.remove('hidden-view');
             state.currentView = viewId;
             if(viewId === 'view-landing') renderCarousel();
-            if(viewId === 'view-admin-dashboard') renderAdminDashboard();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -192,15 +140,10 @@
         function closeModal() { modal.classList.add('hidden-view'); }
 
         function renderCarousel() {
-            const container = document.getElementById('carousel-slides-container');
-            container.innerHTML = '';
-            if(state.slides.length === 0) {
-                container.innerHTML = `<div class="text-center py-8 text-gray-400">Tidak ada pengumuman</div>`;
-                return;
-            }
+            const container = document.getElementById('carousel-slides-container'); container.innerHTML = '';
+            if(state.slides.length === 0) { container.innerHTML = `<div class="text-center py-8 text-gray-400">Tidak ada pengumuman</div>`; return; }
             state.slides.forEach((url, i) => {
-                const div = document.createElement('div');
-                div.className = `carousel-slide ${i === state.slideIndex ? 'active' : ''}`;
+                const div = document.createElement('div'); div.className = `carousel-slide ${i === state.slideIndex ? 'active' : ''}`;
                 div.innerHTML = `<img src="${url}" onerror="this.src='https://placehold.co/800x800/333/fff?text=Gambar+Gagal+Dimuat'">`;
                 container.appendChild(div);
             });
@@ -208,11 +151,9 @@
 
         function changeSlide(n) {
             if(state.slides.length <= 1) return;
-            const els = document.querySelectorAll('.carousel-slide');
-            els[state.slideIndex].classList.remove('active');
+            const els = document.querySelectorAll('.carousel-slide'); els[state.slideIndex].classList.remove('active');
             state.slideIndex += n;
-            if (state.slideIndex >= state.slides.length) state.slideIndex = 0;
-            if (state.slideIndex < 0) state.slideIndex = state.slides.length - 1;
+            if (state.slideIndex >= state.slides.length) state.slideIndex = 0; if (state.slideIndex < 0) state.slideIndex = state.slides.length - 1;
             els[state.slideIndex].classList.add('active');
         }
 
@@ -220,19 +161,12 @@
             const container = document.getElementById('carousel-slides-container');
             container.innerHTML = `<div class="text-center py-10 text-gray-400"><div class="loader mb-2"></div><p>Memuat pengumuman...</p></div>`;
             
+            // Pengambilan data slider secara NATIVE (Anti-Loading/CORS)
             google.script.run
                 .withSuccessHandler(function(res) {
-                    if (res && res.status === 'success') {
-                        state.slides = res.data;
-                        renderCarousel();
-                        if (state.currentView === 'view-admin-dashboard') renderAdminDashboard();
-                    } else {
-                        container.innerHTML = `<div class="text-center py-10 text-red-400">Gagal mengambil data.</div>`;
-                    }
+                    if (res && res.status === 'success') { state.slides = res.data; renderCarousel(); }
                 })
-                .withFailureHandler(function(err) {
-                    container.innerHTML = `<div class="text-center py-10 text-red-400">Menunggu Otorisasi Google Script.<br><span class="text-xs">Buka Code.gs dan klik Run untuk otorisasi.</span></div>`;
-                })
+                .withFailureHandler(function(err) { container.innerHTML = `<div class="text-center py-10 text-red-400">Menunggu Koneksi...</div>`; })
                 .getSlides();
         }
 
@@ -241,9 +175,7 @@
 
         function handleFormSubmit(e) {
             e.preventDefault();
-            const btn = document.getElementById('btn-submit');
-            const loader = document.getElementById('submit-loader');
-            
+            const btn = document.getElementById('btn-submit'); const loader = document.getElementById('submit-loader');
             btn.disabled = true; btn.querySelector('span').innerText = 'Mengirim...'; loader.classList.remove('hidden-view');
 
             const data = {
@@ -260,76 +192,13 @@
                     btn.disabled = false; btn.querySelector('span').innerText = 'Kirim Pendaftaran'; loader.classList.add('hidden-view');
                     if(res && res.success) {
                         showModal("Berhasil!", "Terima kasih, data anda berhasil disimpan.<br><br><span class='italic text-white'>\"KETERBUKAAN ADALAH AWAL DARI PEMULIHAN\"</span>", true);
-                        document.getElementById('registration-form').reset();
-                        setTimeout(() => { closeModal(); switchView('view-landing'); }, 4000);
+                        document.getElementById('registration-form').reset(); setTimeout(() => { closeModal(); switchView('view-landing'); }, 4000);
                     } else { showModal("Gagal", "Sistem merespon: " + (res ? res.message : 'Unknown error')); }
                 })
                 .withFailureHandler(function(err) {
                     btn.disabled = false; btn.querySelector('span').innerText = 'Kirim Pendaftaran'; loader.classList.add('hidden-view');
-                    showModal("Koneksi Error", err.message);
+                    showModal("Koneksi Error", "Koneksi terputus. Coba lagi.");
                 }).submitRegistration(data);
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const pass = document.getElementById('adminPassword').value;
-            const btn = e.target.querySelector('button');
-            btn.innerText = 'Memeriksa...'; btn.disabled = true;
-
-            google.script.run
-                .withSuccessHandler(function(res) {
-                    btn.innerText = 'Login'; btn.disabled = false;
-                    if(res && res.success) {
-                        document.getElementById('adminPassword').value = '';
-                        switchView('view-admin-dashboard');
-                    } else { showModal("Akses Ditolak", "Password salah atau tidak ditemukan."); }
-                })
-                .withFailureHandler(function(err) {
-                    btn.innerText = 'Login'; btn.disabled = false;
-                    showModal("Database Error", "Belum Otorisasi Google Script.<br>Pesan: " + err.message);
-                })
-                .verifyFormAdmin(pass);
-        }
-
-        function renderAdminDashboard() {
-            const list = document.getElementById('admin-slides-list');
-            list.innerHTML = '';
-            state.slides.forEach((url, i) => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center justify-between p-3 bg-gray-800 rounded-lg';
-                item.innerHTML = `<div class="flex items-center gap-3 overflow-hidden"><img src="${url}" class="w-12 h-12 object-cover rounded bg-gray-900"><span class="text-xs text-gray-400 truncate w-32 md:w-64">${url}</span></div><button onclick="removeSlide(${i})" class="text-red-400 font-semibold">Hapus</button>`;
-                list.appendChild(item);
-            });
-        }
-
-        function addSlide(e) {
-            const url = document.getElementById('newSlideUrl').value;
-            if(!url) return;
-            e.target.innerText = "Menyimpan..."; e.target.disabled = true;
-            google.script.run
-                .withSuccessHandler(function() {
-                    document.getElementById('newSlideUrl').value = '';
-                    e.target.innerText = "Tambah"; e.target.disabled = false;
-                    fetchSlides();
-                    showModal("Tersimpan", "Gambar berhasil ditambahkan.", true);
-                })
-                .withFailureHandler(function(err) {
-                    e.target.innerText = "Tambah"; e.target.disabled = false;
-                    showModal("Error", err.message);
-                })
-                .addSlide(url);
-        }
-
-        function removeSlide(index) {
-            showModal("Memproses...", "Menghapus pengumuman...", true);
-            google.script.run
-                .withSuccessHandler(function() {
-                    closeModal(); fetchSlides();
-                })
-                .withFailureHandler(function(err) {
-                    showModal("Error", err.message);
-                })
-                .deleteSlide(index);
         }
     </script>
 </body>
